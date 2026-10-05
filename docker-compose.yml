@@ -1,0 +1,20 @@
+services:
+  agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: rabotka_agent
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      PORT: ${PORT:-3400}
+    ports:
+      - "${PORT:-3400}:${PORT:-3400}"
+    networks:
+      - rabotka_network
+
+networks:
+  rabotka_network:
+    external: true
