@@ -1,6 +1,8 @@
 import Image from "next/image";
 
 import { appConfig } from "#/config";
+import { Button } from "#/components/ui/button";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -20,6 +22,10 @@ export default function HomePage() {
             L&apos;espace agent arrive bientôt.
           </p>
         </div>
+
+        <Button>
+          <Link href="/auth/sign-in">Connexion</Link>
+        </Button>
       </div>
     </main>
   );
