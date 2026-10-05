@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { IconFilter, IconMoodEmpty, IconRefresh } from "@tabler/icons-react";
 
 import { Button } from "#/components/ui/button";
@@ -15,6 +15,7 @@ import { useSession } from "#/app/providers/session-context";
 import { useJobCategories } from "#/hooks/use-job-categories";
 import { useFeedFilters, useJobsFeed } from "#/hooks/use-jobs-feed";
 import { friendlyError } from "#/lib/api/friendly-error";
+import { cn } from "#/lib/utils";
 import { FiltersSidebar, useActiveFilterCount } from "./filters-sidebar";
 import { JobCard, JobCardSkeleton } from "./job-card";
 import { SortSelect } from "./sort-select";
@@ -51,10 +52,12 @@ export function JobsFeed() {
     return () => observer.disconnect();
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const inner = usePageScrolledToEnd();
+
   const sidebar = <FiltersSidebar facets={feed.facets} showPay={isAuthenticated} />;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:pb-0">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:flex lg:h-svh lg:flex-col lg:pb-0">
       <div className="mb-6 flex shrink-0 flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-3">
           <h2 className="font-semibold text-2xl tracking-tight">
@@ -86,16 +89,29 @@ export function JobsFeed() {
       </div>
 
       {/*
-        Desktop: the page does not scroll (see (site)/page.tsx); this row takes
-        the height left under the hero and each column scrolls on its own.
-        Phones keep the normal page scroll.
+        Desktop: this block is one screen tall and is the last thing on the
+        page, so scrolling the page carries the header and hero away until it
+        fills the screen. Only then do the columns scroll on their own
+        (`inner`); before that they are not scrollable, so the wheel moves the
+        page. At the top of the grid, scrolling up hands back to the page and
+        the hero returns. Phones keep the normal page scroll.
       */}
       <div className="flex gap-8 lg:min-h-0 lg:flex-1">
-        <aside className="no-scrollbar hidden w-60 shrink-0 overflow-y-auto overscroll-contain pb-6 lg:block">
+        <aside
+          className={cn(
+            "no-scrollbar hidden w-60 shrink-0 pb-6 lg:block",
+            inner ? "overflow-y-auto" : "overflow-y-hidden",
+          )}
+        >
           {sidebar}
         </aside>
 
-        <div className="no-scrollbar min-w-0 flex-1 lg:-mx-1 lg:overflow-y-auto lg:overscroll-contain lg:px-1 lg:pb-6">
+        <div
+          className={cn(
+            "no-scrollbar min-w-0 flex-1 lg:-mx-1 lg:px-1 lg:pb-6",
+            inner ? "lg:overflow-y-auto" : "lg:overflow-y-hidden",
+          )}
+        >
           {feed.isPending && (
             <div className="grid gap-4 md:grid-cols-2">
               {Array.from({ length: 4 }, (_, i) => (
@@ -145,6 +161,30 @@ export function JobsFeed() {
       </div>
     </div>
   );
+}
+
+/**
+ * True once the page is scrolled to its end, i.e. the feed block fills the
+ * screen and the hero is out of view. Then the columns take over scrolling.
+ */
+function usePageScrolledToEnd() {
+  const [atEnd, setAtEnd] = useState(false);
+
+  useEffect(() => {
+    const update = () => {
+      const root = document.documentElement;
+      setAtEnd(Math.ceil(globalThis.scrollY + globalThis.innerHeight) >= root.scrollHeight - 2);
+    };
+    update();
+    globalThis.addEventListener("scroll", update, { passive: true });
+    globalThis.addEventListener("resize", update);
+    return () => {
+      globalThis.removeEventListener("scroll", update);
+      globalThis.removeEventListener("resize", update);
+    };
+  }, []);
+
+  return atEnd;
 }
 
 function emptyTitle(isAuthenticated: boolean, hasFilters: boolean) {
