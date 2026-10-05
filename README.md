@@ -56,3 +56,18 @@ Add shadcn components with `node_modules/.bin/shadcn add <name>`.
 
 `Dockerfile` builds the Next standalone server. `docker-compose.prod.yml` runs
 the GHCR image behind Traefik on `AGENT_DOMAIN`.
+
+## Deployment
+
+Same pipeline as rabotka-admin (`.github/workflows/`):
+
+| Workflow                   | Trigger               | Does                                                              |
+| -------------------------- | --------------------- | ----------------------------------------------------------------- |
+| `deploy-develop.yml`       | PR merged → `develop` | Builds the image to GHCR, deploys `~/rabotka-agent`, smoke-tests   |
+| `deploy-production.yml`    | PR merged → `main`    | Redeploys the latest image to `~/rabotka-agent-prod`, smoke-tests  |
+| `sync-main-to-develop.yml` | push to `main`        | Fast-forwards `develop` to `main` after a release                 |
+
+Each deploy reads `BACKEND_URL` and `PORT` from Vault
+(`apps/rabotka-agent-develop` / `apps/rabotka-agent-production`) and writes
+them to the VPS `.env`. Develop is served at `agent-rabotka.<INFRA_DOMAIN>`;
+production at the `PROD_AGENT_DOMAIN` secret.
