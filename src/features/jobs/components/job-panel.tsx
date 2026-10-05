@@ -51,7 +51,7 @@ export function JobPanel({ children }: Readonly<{ children: ReactNode }>) {
             </DialogPrimitive.Close>
           </div>
 
-          <div className="flex-1 overflow-y-auto overscroll-contain px-4 pt-2 pb-10 md:px-8">
+          <div className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-4 pt-2 md:px-8">
             {children}
           </div>
         </DialogPrimitive.Content>

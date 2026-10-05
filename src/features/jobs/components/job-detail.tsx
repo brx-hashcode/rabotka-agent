@@ -5,11 +5,16 @@ import {
   IconBriefcase,
   IconCalendar,
   IconClock,
+  IconExternalLink,
+  IconFileDescription,
   IconHash,
   IconLock,
+  IconShare,
   IconMapPin,
   IconUsers,
 } from "@tabler/icons-react";
+
+import { toast } from "sonner";
 
 import { Button } from "#/components/ui/button";
 import { useJobCategories } from "#/hooks/use-job-categories";
@@ -30,7 +35,14 @@ import { cn, formatXAF } from "#/lib/utils";
  * Everyone sees the summary and the description; signed-in agents also get
  * pay and address for jobs in their zones.
  */
-export function JobDetail({ id }: Readonly<{ id: string }>) {
+export function JobDetail({
+  id,
+  variant = "page",
+}: Readonly<{
+  id: string;
+  /** "panel": inside the side panel, with the action bar pinned to its bottom. */
+  variant?: "page" | "panel";
+}>) {
   const detail = useJobDetail(id);
   const categories = useJobCategories();
 
@@ -74,7 +86,7 @@ export function JobDetail({ id }: Readonly<{ id: string }>) {
   ];
 
   return (
-    <article className="flex flex-col gap-6">
+    <article className="flex flex-1 flex-col gap-6">
       <header className="flex items-start gap-4">
         <span
           aria-hidden
@@ -109,18 +121,37 @@ export function JobDetail({ id }: Readonly<{ id: string }>) {
       </dl>
 
       {agentJob?.address && (
-        <section className="space-y-1.5">
+        <section className="space-y-2">
           <h2 className="font-semibold text-sm">Adresse</h2>
-          <p className="text-muted-foreground text-sm">{agentJob.address}</p>
+          <p className="flex items-start gap-2.5 rounded-2xl bg-page px-5 py-4 text-sm">
+            <IconMapPin className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
+            {agentJob.address}
+          </p>
         </section>
       )}
 
-      <section className="space-y-1.5">
+      <section className="space-y-2">
         <h2 className="font-semibold text-sm">Description</h2>
-        <p className="whitespace-pre-line text-muted-foreground text-sm leading-relaxed">
-          {job.description?.trim() || "L'employeur n'a pas ajouté de description."}
-        </p>
+        {job.description?.trim() ? (
+          <p className="whitespace-pre-line rounded-2xl bg-page px-5 py-4 text-sm leading-relaxed">
+            {job.description.trim()}
+          </p>
+        ) : (
+          <div className="flex items-center gap-3 rounded-2xl bg-page px-5 py-4">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-card text-muted-foreground">
+              <IconFileDescription className="size-4.5" />
+            </span>
+            <div>
+              <p className="font-medium text-sm">Pas encore de description</p>
+              <p className="text-muted-foreground text-xs">
+                L&apos;employeur n&apos;a rien précisé pour le moment.
+              </p>
+            </div>
+          </div>
+        )}
       </section>
+
+      <JobActions detail={detail.data} variant={variant} />
     </article>
   );
 }
@@ -157,18 +188,71 @@ function AccessBlock({ detail }: Readonly<{ detail: JobDetailResult }>) {
     );
   }
 
-  const next = encodeURIComponent(`/jobs/${detail.job.id}`);
   return (
-    <div className="flex flex-col gap-3 rounded-2xl bg-muted/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-      <p className="flex items-start gap-2.5 text-sm">
-        <IconLock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-        La rémunération et l&apos;adresse sont réservées aux agents Rabotka.
-      </p>
+    <p className="flex items-center gap-2.5 rounded-2xl bg-page px-5 py-3.5 text-muted-foreground text-sm">
+      <IconLock className="size-4 shrink-0" />
+      La rémunération et l&apos;adresse sont réservées aux agents Rabotka.
+    </p>
+  );
+}
+
+/**
+ * Sign-in (anonymous) and share. In the panel it sticks to the bottom so the
+ * next step is always in reach; on the page it simply closes the card.
+ */
+function JobActions({
+  detail,
+  variant,
+}: Readonly<{ detail: JobDetailResult; variant: "page" | "panel" }>) {
+  const { job } = detail;
+  const anonymous = detail.kind === "public" && !detail.outsideZones;
+  const jobPath = `/jobs/${job.id}`;
+
+  async function share() {
+    const url = `${globalThis.location.origin}${jobPath}`;
+    if (navigator.share) {
+      await navigator.share({ title: job.title, url }).catch(() => undefined);
+      return;
+    }
+    await navigator.clipboard.writeText(url);
+    toast.success("Lien de l'offre copié");
+  }
+
+  return (
+    <div
+      className={cn(
+        "mt-auto flex items-center gap-2 pt-2",
+        variant === "panel" &&
+          "sticky bottom-0 -mx-4 bg-card/95 px-4 pt-4 pb-5 backdrop-blur md:-mx-8 md:px-8",
+      )}
+    >
+      {anonymous && (
+        <Button
+          size="lg"
+          className="flex-1 rounded-full"
+          render={
+            <Link href={`/auth/sign-in?next=${encodeURIComponent(jobPath)}`} scroll={false} />
+          }
+        >
+          Se connecter pour voir la rémunération
+        </Button>
+      )}
+      {!anonymous && variant === "panel" && (
+        // A plain anchor: a soft link to the same URL would be intercepted
+        // into this panel again.
+        <Button size="lg" variant="secondary" className="flex-1 rounded-full" render={<a href={jobPath} />}>
+          <IconExternalLink />
+          Ouvrir la page
+        </Button>
+      )}
       <Button
-        className="shrink-0 rounded-full px-5"
-        render={<Link href={`/auth/sign-in?next=${next}`} scroll={false} />}
+        size="icon-lg"
+        variant="secondary"
+        className={cn("shrink-0 rounded-full", !anonymous && variant === "page" && "ml-auto")}
+        onClick={() => void share()}
+        aria-label="Partager l'offre"
       >
-        Se connecter
+        <IconShare />
       </Button>
     </div>
   );

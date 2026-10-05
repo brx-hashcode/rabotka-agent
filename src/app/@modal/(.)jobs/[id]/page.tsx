@@ -8,7 +8,7 @@ export default async function JobModal({
   const { id } = await params;
   return (
     <JobPanel>
-      <JobDetail id={id} />
+      <JobDetail id={id} variant="panel" />
     </JobPanel>
   );
 }
