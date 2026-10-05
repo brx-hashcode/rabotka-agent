@@ -51,8 +51,15 @@ export function useRevealPhone() {
 export function useLogCall(jobId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ leadId, outcome }: { leadId: string; outcome: CallOutcome }) =>
-      logCall(leadId, outcome),
+    mutationFn: ({
+      leadId,
+      outcome,
+      note,
+    }: {
+      leadId: string;
+      outcome: CallOutcome;
+      note?: string;
+    }) => logCall(leadId, outcome, note),
     // A closing outcome removes the worker from the suggestions; refetch.
     onSuccess: () => queryClient.invalidateQueries({ queryKey: candidatesKey(jobId) }),
   });

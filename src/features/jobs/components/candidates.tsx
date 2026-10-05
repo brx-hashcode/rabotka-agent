@@ -1,10 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { format, isToday } from "date-fns";
 import { fr } from "date-fns/locale";
 import {
   IconBrandWhatsapp,
-  IconChevronDown,
+  IconCalendarOff,
+  IconClipboardCheck,
+  IconClockHour4,
+  IconPhoneOff,
+  IconPhoneX,
+  IconThumbDown,
+  IconThumbUp,
+  IconUserCheck,
   IconRosetteDiscountCheckFilled,
   IconLock,
   IconPhone,
@@ -17,14 +25,7 @@ import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { Button } from "#/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "#/components/ui/dropdown-menu";
+import { Textarea } from "#/components/ui/textarea";
 import {
   useCandidates,
   useClaimLead,
@@ -34,14 +35,44 @@ import {
 import { friendlyError } from "#/lib/api/friendly-error";
 import type { AgentCandidate, AgentLead, CallOutcome, PhoneReveal } from "#/lib/api/types";
 import { cn, getInitials } from "#/lib/utils";
+import { ActionDialog } from "./action-dialog";
 
-const OUTCOMES: { value: CallOutcome; label: string; closes?: boolean }[] = [
-  { value: "INTERESTED", label: "Intéressé" },
-  { value: "CALL_BACK", label: "À rappeler" },
-  { value: "NOT_AVAILABLE", label: "Pas disponible pour cette date" },
-  { value: "NOT_INTERESTED", label: "Pas intéressé", closes: true },
-  { value: "UNREACHABLE", label: "Injoignable", closes: true },
-  { value: "WRONG_NUMBER", label: "Mauvais numéro", closes: true },
+const OUTCOMES: {
+  value: CallOutcome;
+  label: string;
+  hint: string;
+  icon: typeof IconPhone;
+  closes?: boolean;
+}[] = [
+  { value: "INTERESTED", label: "Intéressé", hint: "Prêt à postuler à l'offre", icon: IconThumbUp },
+  { value: "CALL_BACK", label: "À rappeler", hint: "Rappeler plus tard", icon: IconClockHour4 },
+  {
+    value: "NOT_AVAILABLE",
+    label: "Pas disponible",
+    hint: "Pas libre à cette date",
+    icon: IconCalendarOff,
+  },
+  {
+    value: "NOT_INTERESTED",
+    label: "Pas intéressé",
+    hint: "Refuse l'offre",
+    icon: IconThumbDown,
+    closes: true,
+  },
+  {
+    value: "UNREACHABLE",
+    label: "Injoignable",
+    hint: "Ne répond pas",
+    icon: IconPhoneOff,
+    closes: true,
+  },
+  {
+    value: "WRONG_NUMBER",
+    label: "Mauvais numéro",
+    hint: "Le numéro n'est pas le sien",
+    icon: IconPhoneX,
+    closes: true,
+  },
 ];
 const OUTCOME_LABEL = Object.fromEntries(OUTCOMES.map((o) => [o.value, o.label]));
 
@@ -156,6 +187,7 @@ function LeadActions({
   workerName,
 }: Readonly<{ lead: AgentLead; jobId: string; workerName: string }>) {
   const claim = useClaimLead(jobId);
+  const [confirming, setConfirming] = useState(false);
 
   if (lead.status === "CONFIRMED") {
     return <StatusLine tone="green">A postulé à l&apos;offre</StatusLine>;
@@ -175,20 +207,32 @@ function LeadActions({
   }
 
   return (
-    <Button
-      size="lg"
-      className="w-full rounded-full"
-      loading={claim.isPending}
-      onClick={() =>
-        claim.mutate(lead.id, {
-          onSuccess: () => toast.success(`${workerName} est à vous`),
-          onError: (err) =>
-            toast.error(friendlyError(err, "Impossible de prendre ce travailleur en charge.")),
-        })
-      }
-    >
-      Prendre en charge
-    </Button>
+    <>
+      <Button size="lg" className="w-full rounded-full" onClick={() => setConfirming(true)}>
+        Prendre en charge
+      </Button>
+      <ActionDialog
+        open={confirming}
+        onOpenChange={setConfirming}
+        icon={<IconUserCheck className="size-5" />}
+        title={`Prendre ${workerName} en charge ?`}
+        description={`${workerName} vous sera réservé(e) pour une durée limitée : les autres agents ne pourront pas l'appeler. Vous pourrez ensuite voir son numéro.`}
+        confirmLabel="Prendre en charge"
+        pending={claim.isPending}
+        onConfirm={() =>
+          claim.mutate(lead.id, {
+            onSuccess: () => {
+              setConfirming(false);
+              toast.success(`${workerName} est à vous`);
+            },
+            onError: (err) => {
+              setConfirming(false);
+              toast.error(friendlyError(err, "Impossible de prendre ce travailleur en charge."));
+            },
+          })
+        }
+      />
+    </>
   );
 }
 
@@ -210,6 +254,10 @@ function MyLead({
   }).data;
   const reveal = useRevealPhone();
   const logCall = useLogCall(jobId);
+  const [dialog, setDialog] = useState<"reveal" | "call" | null>(null);
+  const [outcome, setOutcome] = useState<CallOutcome | null>(null);
+  const [note, setNote] = useState("");
+  const selected = OUTCOMES.find((o) => o.value === outcome);
 
   const until = lead.claimExpiresAt ? new Date(lead.claimExpiresAt) : null;
   const untilLabel = until
@@ -269,61 +317,117 @@ function MyLead({
           )}
         </div>
       ) : (
-        <Button
-          size="lg"
-          className="w-full rounded-full"
-          loading={reveal.isPending}
-          onClick={() =>
-            reveal.mutate(lead.id, {
-              onSuccess: (data) => queryClient.setQueryData(revealKey, data),
-              onError: (err) => toast.error(friendlyError(err, "Impossible d'afficher le numéro.")),
-            })
-          }
-        >
+        <Button size="lg" className="w-full rounded-full" onClick={() => setDialog("reveal")}>
           <IconPhone />
           Voir le numéro de {workerName}
         </Button>
       )}
 
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            size="lg"
-            variant="ghost"
-            className="w-full rounded-full bg-card"
-            loading={logCall.isPending}
-          >
-            Résultat de l&apos;appel
-            <IconChevronDown />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" className="w-64">
-          <DropdownMenuLabel>Comment s&apos;est passé l&apos;appel ?</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {OUTCOMES.map((o) => (
-            <DropdownMenuItem
-              key={o.value}
-              className={cn(o.closes && "text-muted-foreground")}
-              onSelect={() =>
-                logCall.mutate(
-                  { leadId: lead.id, outcome: o.value },
-                  {
-                    onSuccess: () =>
-                      toast.success(
-                        o.closes
-                          ? `Appel enregistré : ${o.label.toLowerCase()}. ${workerName} sort des suggestions.`
-                          : `Appel enregistré : ${o.label.toLowerCase()}.`,
-                      ),
-                    onError: (err) => toast.error(friendlyError(err, "Impossible d'enregistrer l'appel.")),
-                  },
-                )
-              }
-            >
-              {o.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <ActionDialog
+        open={dialog === "reveal"}
+        onOpenChange={(open) => setDialog(open ? "reveal" : null)}
+        icon={<IconPhone className="size-5" />}
+        title={`Voir le numéro de ${workerName} ?`}
+        description="Chaque consultation est enregistrée et compte dans votre limite de numéros du jour. Revoir ce même numéro aujourd'hui ne compte pas une seconde fois."
+        confirmLabel="Voir le numéro"
+        pending={reveal.isPending}
+        onConfirm={() =>
+          reveal.mutate(lead.id, {
+            onSuccess: (data) => {
+              queryClient.setQueryData(revealKey, data);
+              setDialog(null);
+            },
+            onError: (err) => {
+              setDialog(null);
+              toast.error(friendlyError(err, "Impossible d'afficher le numéro."));
+            },
+          })
+        }
+      />
+
+      <Button
+        size="lg"
+        variant="ghost"
+        className="w-full rounded-full bg-card"
+        onClick={() => {
+          setOutcome(null);
+          setNote("");
+          setDialog("call");
+        }}
+      >
+        <IconClipboardCheck />
+        Résultat de l&apos;appel
+      </Button>
+
+      <ActionDialog
+        open={dialog === "call"}
+        onOpenChange={(open) => setDialog(open ? "call" : null)}
+        icon={<IconClipboardCheck className="size-5" />}
+        title={`Comment s'est passé l'appel avec ${workerName} ?`}
+        confirmLabel="Enregistrer"
+        confirmDisabled={!outcome}
+        pending={logCall.isPending}
+        tone={selected?.closes ? "warning" : "default"}
+        onConfirm={() => {
+          if (!outcome) return;
+          logCall.mutate(
+            { leadId: lead.id, outcome, note: note.trim() || undefined },
+            {
+              onSuccess: () => {
+                setDialog(null);
+                toast.success(
+                  selected?.closes
+                    ? `Appel enregistré. ${workerName} sort de vos suggestions.`
+                    : "Appel enregistré.",
+                );
+              },
+              onError: (err) => toast.error(friendlyError(err, "Impossible d'enregistrer l'appel.")),
+            },
+          );
+        }}
+      >
+        <div className="grid grid-cols-2 gap-2" role="radiogroup" aria-label="Résultat de l'appel">
+          {OUTCOMES.map((o) => {
+            const active = outcome === o.value;
+            return (
+              <button
+                key={o.value}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => setOutcome(o.value)}
+                className={cn(
+                  "flex flex-col items-start gap-1.5 rounded-2xl px-3.5 py-3 text-left transition-colors",
+                  active ? "bg-header text-header-foreground" : "bg-page hover:bg-muted",
+                )}
+              >
+                <o.icon
+                  className={cn(
+                    "size-5",
+                    active ? "text-whatsapp" : o.closes ? "text-muted-foreground" : "text-whatsapp-dark",
+                  )}
+                />
+                <span className="font-medium text-sm">{o.label}</span>
+                <span className={cn("text-xs", active ? "text-header-muted" : "text-muted-foreground")}>
+                  {o.hint}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        {selected?.closes && (
+          <p className="rounded-2xl bg-chip-amber px-4 py-3 text-chip-amber-foreground text-sm">
+            {workerName} ne vous sera plus proposé(e) pour cette offre.
+          </p>
+        )}
+        <Textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value.slice(0, 500))}
+          placeholder="Note (facultatif) : disponibilité, remarque…"
+          rows={2}
+          className="resize-none rounded-2xl border-0 bg-page px-4 py-3 shadow-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+        />
+      </ActionDialog>
     </div>
   );
 }

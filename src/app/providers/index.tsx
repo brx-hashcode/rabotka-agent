@@ -77,7 +77,7 @@ export function Providers({ children, isAuthenticated }: ProvidersProps) {
           <NuqsAdapter>
             <TooltipProvider>
               {children}
-              <Toaster />
+              <Toaster position="top-center" />
             </TooltipProvider>
           </NuqsAdapter>
         </ThemeProvider>
