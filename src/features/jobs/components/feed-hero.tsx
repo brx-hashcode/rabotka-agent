@@ -47,7 +47,7 @@ export function FeedHero() {
   }
 
   return (
-    <section className="relative overflow-hidden bg-header text-header-foreground">
+    <section className="relative shrink-0 overflow-hidden bg-header text-header-foreground">
       <div className="relative mx-auto w-full max-w-6xl px-4 pt-8 pb-10 sm:px-6 md:pt-12 md:pb-14">
         <div
           aria-hidden

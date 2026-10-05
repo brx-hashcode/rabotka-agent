@@ -54,8 +54,8 @@ export function JobsFeed() {
   const sidebar = <FiltersSidebar facets={feed.facets} showPay={isAuthenticated} />;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:pb-0">
+      <div className="mb-6 flex shrink-0 flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-3">
           <h2 className="font-semibold text-2xl tracking-tight">
             {isAuthenticated ? "Offres de vos zones" : "Offres ouvertes"}
@@ -85,12 +85,17 @@ export function JobsFeed() {
         </div>
       </div>
 
-      <div className="flex gap-8">
-        <aside className="hidden w-60 shrink-0 lg:block">
-          <div className="sticky top-6">{sidebar}</div>
+      {/*
+        Desktop: the page does not scroll (see (site)/page.tsx); this row takes
+        the height left under the hero and each column scrolls on its own.
+        Phones keep the normal page scroll.
+      */}
+      <div className="flex gap-8 lg:min-h-0 lg:flex-1">
+        <aside className="no-scrollbar hidden w-60 shrink-0 overflow-y-auto overscroll-contain pb-6 lg:block">
+          {sidebar}
         </aside>
 
-        <div className="min-w-0 flex-1">
+        <div className="no-scrollbar min-w-0 flex-1 lg:-mx-1 lg:overflow-y-auto lg:overscroll-contain lg:px-1 lg:pb-6">
           {feed.isPending && (
             <div className="grid gap-4 md:grid-cols-2">
               {Array.from({ length: 4 }, (_, i) => (
