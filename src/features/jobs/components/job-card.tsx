@@ -15,23 +15,17 @@ import { cn, formatXAF } from "#/lib/utils";
 
 /**
  * One job, as the mockup's card. No employer anywhere — the category emoji
- * takes the logo slot. Signed-in agents see the description and pay and open
- * the job; anonymous visitors get the summary and a soft link to sign-in
- * (intercepted into the dialog) with `next` set to the job.
+ * takes the logo slot. Signed-in agents also see the description and pay.
+ * A soft link to /jobs/[id], which the `@modal` slot opens as a side panel.
  */
 export function JobCard({
   job,
   icon,
-  isAuthenticated,
 }: Readonly<{
   job: FeedJob;
   icon: JobCategoryOption["icon"] | undefined;
-  isAuthenticated: boolean;
 }>) {
-  const jobHref = `/jobs/${job.id}`;
-  const href = isAuthenticated
-    ? jobHref
-    : `/auth/sign-in?next=${encodeURIComponent(jobHref)}`;
+  const href = `/jobs/${job.id}`;
   const start = jobStartShort(job.scheduledAt);
   const agentJob = isAgentJob(job) ? job : null;
 
@@ -39,20 +33,20 @@ export function JobCard({
     <Link
       href={href}
       scroll={false}
-      className="group flex flex-col rounded-2xl bg-card p-5 shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex flex-col rounded-2xl bg-card p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="flex items-start gap-3">
         <span
           aria-hidden
-          className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted text-xl"
+          className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-page text-2xl"
         >
           {icon ?? "💼"}
         </span>
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-semibold leading-snug group-hover:underline">
+          <h3 className="line-clamp-2 font-semibold text-[17px] leading-snug transition-colors group-hover:text-whatsapp-dark">
             {job.title}
           </h3>
-          <p className="truncate text-muted-foreground text-xs">
+          <p className="mt-0.5 truncate text-muted-foreground text-[13px]">
             {job.category?.name ?? "Sans catégorie"}
             <span className="mx-1.5">•</span>
             <span className={cn(job.seatsLeft <= 0 && "text-destructive")}>
@@ -130,7 +124,7 @@ function Chip({
 
 export function JobCardSkeleton() {
   return (
-    <div className="flex h-52 flex-col gap-4 rounded-2xl bg-card p-5 shadow-soft">
+    <div className="flex h-52 flex-col gap-4 rounded-2xl bg-card p-6">
       <div className="flex gap-3">
         <div className="size-11 animate-pulse rounded-xl bg-muted" />
         <div className="flex-1 space-y-2 pt-1">

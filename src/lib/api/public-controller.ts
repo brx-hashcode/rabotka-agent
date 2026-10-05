@@ -19,6 +19,10 @@ class PublicController extends AgentBaseController {
     return this.get(this.createURL("/public/jobs", params));
   }
 
+  getJob(id: string): Promise<PublicJob> {
+    return this.get(`/public/jobs/${encodeURIComponent(id)}`);
+  }
+
   getJobCategories(): Promise<JobCategoryOption[]> {
     return this.get("/job-categories");
   }
@@ -37,6 +41,7 @@ class PublicController extends AgentBaseController {
 const controller = new PublicController();
 
 export const listPublicJobs = controller.listJobs.bind(controller);
+export const getPublicJob = controller.getJob.bind(controller);
 export const getJobCategories = controller.getJobCategories.bind(controller);
 export const getCountries = controller.getCountries.bind(controller);
 export const getCities = controller.getCities.bind(controller);

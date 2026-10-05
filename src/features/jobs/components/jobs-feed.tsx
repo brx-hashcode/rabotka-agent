@@ -86,14 +86,14 @@ export function JobsFeed() {
       </div>
 
       <div className="flex gap-8">
-        <aside className="hidden w-56 shrink-0 lg:block">
+        <aside className="hidden w-60 shrink-0 lg:block">
           <div className="sticky top-6">{sidebar}</div>
         </aside>
 
         <div className="min-w-0 flex-1">
           {feed.isPending && (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {Array.from({ length: 6 }, (_, i) => (
+            <div className="grid gap-4 md:grid-cols-2">
+              {Array.from({ length: 4 }, (_, i) => (
                 <JobCardSkeleton key={i} />
               ))}
             </div>
@@ -122,17 +122,16 @@ export function JobsFeed() {
           )}
 
           {feed.jobs.length > 0 && (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               {feed.jobs.map((job) => (
                 <JobCard
                   key={job.id}
                   job={job}
                   icon={job.category ? iconBySlug.get(job.category.slug) : undefined}
-                  isAuthenticated={isAuthenticated}
                 />
               ))}
               {feed.isFetchingNextPage &&
-                Array.from({ length: 3 }, (_, i) => <JobCardSkeleton key={`more-${i}`} />)}
+                Array.from({ length: 2 }, (_, i) => <JobCardSkeleton key={`more-${i}`} />)}
             </div>
           )}
 

@@ -8,7 +8,7 @@ import { useJobCategories } from "#/hooks/use-job-categories";
 import { EMPLOYMENT_TYPES, useFeedFilters } from "#/hooks/use-jobs-feed";
 import type { JobFacets } from "#/lib/api/types";
 import { EMPLOYMENT_TYPE_LABELS } from "#/lib/job-labels";
-import { formatXAF } from "#/lib/utils";
+import { cn, formatXAF } from "#/lib/utils";
 
 /** Number of active sidebar filters (for the mobile "Filtres (n)" button). */
 export function useActiveFilterCount() {
@@ -60,7 +60,7 @@ export function FiltersSidebar({
           <CheckRow
             key={type}
             label={EMPLOYMENT_TYPE_LABELS[type]}
-            count={facets?.employmentType[type]}
+            count={facets ? (facets.employmentType[type] ?? 0) : undefined}
             checked={f.types.includes(type)}
             onChange={() => void setFilters({ types: toggle(f.types, type) })}
           />
@@ -89,7 +89,7 @@ export function FiltersSidebar({
                   {c.name}
                 </>
               }
-              count={facets?.category[c.slug]}
+              count={facets ? (facets.category[c.slug] ?? 0) : undefined}
               checked={f.categories.includes(c.slug)}
               onChange={() => void setFilters({ categories: toggle(f.categories, c.slug) })}
             />
@@ -128,10 +128,18 @@ function CheckRow({
   onChange: () => void;
 }>) {
   return (
-    <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+    <label
+      className={cn(
+        "flex cursor-pointer items-center gap-2.5 text-sm",
+        // Nothing to find there right now: still tickable, visibly quieter.
+        count === 0 && !checked && "text-muted-foreground",
+      )}
+    >
       <Checkbox checked={checked} onCheckedChange={onChange} />
       <span className="min-w-0 flex-1 truncate">{label}</span>
-      {count !== undefined && <span className="text-muted-foreground text-xs tabular-nums">{count}</span>}
+      {count !== undefined && (
+        <span className="text-muted-foreground text-xs tabular-nums">{count}</span>
+      )}
     </label>
   );
 }
