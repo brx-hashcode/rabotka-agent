@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { IconArrowLeft, IconX } from "@tabler/icons-react";
 
 import { cn } from "#/lib/utils";
 
@@ -35,23 +34,8 @@ export function JobPanel({ children }: Readonly<{ children: ReactNode }>) {
         >
           <DialogPrimitive.Title className="sr-only">Détail de l&apos;offre</DialogPrimitive.Title>
 
-          <div className="flex items-center justify-between px-4 pt-3 md:px-6 md:pt-5">
-            <DialogPrimitive.Close
-              className="-ml-2 inline-flex size-10 items-center justify-center rounded-full hover:bg-muted md:hidden"
-              aria-label="Retour"
-            >
-              <IconArrowLeft className="size-5" />
-            </DialogPrimitive.Close>
-            <span className="hidden md:block" />
-            <DialogPrimitive.Close
-              className="hidden size-9 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:inline-flex"
-              aria-label="Fermer"
-            >
-              <IconX className="size-5" />
-            </DialogPrimitive.Close>
-          </div>
-
-          <div className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-4 pt-2 md:px-8">
+          {/* JobDetail draws its own sticky top bar (close, share) and footer. */}
+          <div className="flex flex-1 flex-col overflow-y-auto overscroll-contain px-4 md:px-8">
             {children}
           </div>
         </DialogPrimitive.Content>

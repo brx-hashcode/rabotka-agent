@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { IconArrowLeft } from "@tabler/icons-react";
-
 import { JobDetail } from "#/features/jobs/components/job-detail";
 
 /**
@@ -13,14 +10,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
   const { id } = await params;
   return (
     <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
-      <Link
-        href="/"
-        className="mb-4 inline-flex items-center gap-1.5 text-muted-foreground text-sm hover:text-foreground"
-      >
-        <IconArrowLeft className="size-4" />
-        Toutes les offres
-      </Link>
-      <div className="rounded-3xl bg-card p-6 sm:p-8">
+      <div className="flex flex-col rounded-3xl bg-card px-4 pt-4 sm:px-8 sm:pt-6">
         <JobDetail id={id} />
       </div>
     </div>
