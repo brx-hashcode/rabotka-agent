@@ -33,7 +33,7 @@ export function JobCard({
     <Link
       href={href}
       scroll={false}
-      className="group flex flex-col rounded-2xl bg-card p-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group flex min-w-0 flex-col rounded-2xl bg-card p-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:p-6"
     >
       <div className="flex items-start gap-3">
         <span
@@ -72,9 +72,9 @@ export function JobCard({
 
       <div className="mt-auto pt-4">
         <div aria-hidden className="mb-4 h-px bg-border/70" />
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
           {agentJob ? (
-            <p className="truncate">
+            <p className="min-w-0">
               {agentJob.amount !== null ? (
                 <>
                   <span className="font-bold text-lg">{formatXAF(agentJob.amount)}</span>
@@ -124,7 +124,7 @@ function Chip({
 
 export function JobCardSkeleton() {
   return (
-    <div className="flex h-52 flex-col gap-4 rounded-2xl bg-card p-6">
+    <div className="flex h-52 min-w-0 flex-col gap-4 rounded-2xl bg-card p-4 sm:p-6">
       <div className="flex gap-3">
         <div className="size-11 animate-pulse rounded-xl bg-muted" />
         <div className="flex-1 space-y-2 pt-1">

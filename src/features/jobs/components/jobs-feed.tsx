@@ -113,7 +113,7 @@ export function JobsFeed() {
           )}
         >
           {feed.isPending && (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {Array.from({ length: 4 }, (_, i) => (
                 <JobCardSkeleton key={i} />
               ))}
@@ -143,7 +143,7 @@ export function JobsFeed() {
           )}
 
           {feed.jobs.length > 0 && (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {feed.jobs.map((job) => (
                 <JobCard
                   key={job.id}

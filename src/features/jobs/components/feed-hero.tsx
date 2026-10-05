@@ -65,7 +65,7 @@ export function FeedHero() {
         </div>
 
         <div className="relative max-w-xl space-y-3">
-          <h1 className="font-semibold text-3xl tracking-tight sm:text-4xl">
+          <h1 className="font-semibold text-[28px] leading-tight tracking-tight sm:text-4xl">
             {isAuthenticated ? "Les offres de votre zone" : "Trouvez les offres de votre zone"}
           </h1>
           <p className="text-header-muted text-sm sm:text-base">
