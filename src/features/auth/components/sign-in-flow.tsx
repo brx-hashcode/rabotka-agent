@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { friendlyError } from "#/lib/api/friendly-error";
 import { safeRedirectPath } from "#/lib/safe-redirect";
+import { cn } from "#/lib/utils";
 import {
   useResendOtpMutation,
   useSendOtpMutation,
@@ -22,7 +23,13 @@ import { Step2OtpForm } from "./step2-otp-form";
  * The backend answers send-otp with success whether or not the email belongs
  * to an agent (no enumeration), so step 2 never says "unknown address".
  */
-export function SignInFlow() {
+export function SignInFlow({
+  layout = "centered",
+}: Readonly<{
+  /** "split": the full page's form column — left-aligned, no logo (the photo panel carries the brand). */
+  layout?: "centered" | "split";
+}>) {
+  const split = layout === "split";
   const searchParams = useSearchParams();
   const redirectTo = safeRedirectPath(searchParams.get("next")) ?? "/";
 
@@ -70,17 +77,29 @@ export function SignInFlow() {
   }
 
   return (
-    <div className="flex w-full flex-col gap-6">
-      <div className="flex flex-col items-center gap-3 text-center">
-        <Image
-          src="/rabotka-logo.png"
-          alt="Rabotka"
-          width={48}
-          height={48}
-          className="rounded-xl"
-        />
-        <div className="space-y-1">
-          <h2 className="font-semibold text-xl">
+    <div className={cn("flex w-full flex-col", split ? "gap-8" : "gap-6")}>
+      <div
+        className={cn(
+          "flex flex-col gap-3",
+          split ? "items-start text-left" : "items-center text-center",
+        )}
+      >
+        {!split && (
+          <Image
+            src="/rabotka-logo.png"
+            alt="Rabotka"
+            width={48}
+            height={48}
+            className="rounded-xl"
+          />
+        )}
+        <div className="space-y-1.5">
+          <h2
+            className={cn(
+              "font-semibold tracking-tight",
+              split ? "text-3xl" : "text-xl",
+            )}
+          >
             {email ? "Saisissez votre code" : "Connexion agent"}
           </h2>
           <p className="text-muted-foreground text-sm">
@@ -112,7 +131,7 @@ export function SignInFlow() {
         />
       )}
 
-      <p className="text-center text-muted-foreground text-xs">
+      <p className={cn("text-muted-foreground text-xs", !split && "text-center")}>
         Les comptes agents sont créés par l&apos;équipe Rabotka.
       </p>
     </div>

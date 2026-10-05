@@ -152,7 +152,7 @@ export function Step2OtpForm({
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground text-center">
+      <p className="text-sm text-muted-foreground">
         Code envoyé à <span className="font-medium text-foreground">{email}</span>
       </p>
       <Form {...form}>
@@ -178,7 +178,7 @@ export function Step2OtpForm({
                         onKeyDown={(e) => handleKeyDown(index, e)}
                         onPaste={(e) => handlePaste(e, field.onChange)}
                         disabled={isVerifying || isResending}
-                        className="h-11 w-full aspect-square text-center text-lg font-bold"
+                        className="h-14 w-full rounded-2xl border-0 bg-page text-center font-bold text-xl shadow-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
                         autoFocus={index === 0}
                         autoComplete={index === 0 ? "one-time-code" : "off"}
                         aria-label={`Chiffre ${index + 1}`}
@@ -193,7 +193,8 @@ export function Step2OtpForm({
           <div className="space-y-2">
             <Button
               type="submit"
-              className="w-full cursor-pointer"
+              size="xl"
+              className="w-full rounded-full"
               disabled={isVerifying || isResending}
             >
               {isVerifying ? (
@@ -208,7 +209,7 @@ export function Step2OtpForm({
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-sm cursor-pointer"
+              className="w-full rounded-full text-sm"
               onClick={handleResend}
               disabled={isVerifying || isResending || resendCooldown > 0}
             >
@@ -217,7 +218,7 @@ export function Step2OtpForm({
             <Button
               type="button"
               variant="ghost"
-              className="w-full text-sm text-muted-foreground cursor-pointer"
+              className="w-full rounded-full text-sm text-muted-foreground"
               onClick={onBack}
               disabled={isVerifying || isResending}
             >

@@ -53,7 +53,7 @@ export function Step1EmailForm({
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="font-medium text-sm">Adresse email</FormLabel>
               <FormControl>
                 <Input
                   {...field}
@@ -62,6 +62,7 @@ export function Step1EmailForm({
                   autoComplete="email"
                   disabled={isLoading}
                   autoFocus
+                  className="h-12 rounded-full border-0 bg-page px-5 text-[15px] shadow-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
                 />
               </FormControl>
               <FormMessage />
@@ -70,7 +71,8 @@ export function Step1EmailForm({
         />
         <Button
           type="submit"
-          className="w-full cursor-pointer"
+          size="xl"
+          className="w-full rounded-full"
           disabled={isLoading}
         >
           {isLoading ? (
