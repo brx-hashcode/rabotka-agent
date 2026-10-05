@@ -135,10 +135,6 @@ export function SignInFlow({
       )}
 
       {belowForm}
-
-      <p className={cn("text-muted-foreground text-xs", !split && "text-center")}>
-        Les comptes agents sont créés par l&apos;équipe Rabotka.
-      </p>
     </div>
   );
 }

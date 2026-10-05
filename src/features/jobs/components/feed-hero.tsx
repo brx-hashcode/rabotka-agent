@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import { IconMapPin, IconSearch, IconSparkles } from "@tabler/icons-react";
+import { IconMapPin, IconSearch } from "@tabler/icons-react";
 
 import { Button } from "#/components/ui/button";
 import { useSession } from "#/app/providers/session-context";
@@ -65,9 +65,8 @@ export function FeedHero() {
         </div>
 
         <div className="relative max-w-xl space-y-3">
-          <h1 className="flex items-center gap-3 font-semibold text-3xl tracking-tight sm:text-4xl">
+          <h1 className="font-semibold text-3xl tracking-tight sm:text-4xl">
             {isAuthenticated ? "Les offres de votre zone" : "Trouvez les offres de votre zone"}
-            <IconSparkles className="size-7 shrink-0 text-whatsapp sm:size-8" />
           </h1>
           <p className="text-header-muted text-sm sm:text-base">
             {isAuthenticated

@@ -37,7 +37,7 @@ export function SiteHeader() {
             priority
           />
           <span className="text-[15px]">
-            Rabotka <span className="font-normal text-header-muted">Agent</span>
+            Rabotka
           </span>
         </Link>
 

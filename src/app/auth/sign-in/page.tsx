@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { IconArrowLeft, IconCheck, IconSparkles } from "@tabler/icons-react";
+import { IconArrowLeft, IconCheck } from "@tabler/icons-react";
 
 import { SignInFlow } from "#/features/auth/components/sign-in-flow";
 
@@ -40,12 +40,11 @@ export default function SignInPage() {
         >
           <Image src="/rabotka-logo.png" alt="" width={32} height={32} className="rounded-lg" />
           <span className="text-[15px]">
-            Rabotka <span className="font-normal text-header-muted">Agent</span>
+            Rabotka
           </span>
         </Link>
 
         <div className="relative mt-auto flex max-w-xl flex-col gap-6 p-12">
-          <IconSparkles className="size-9 text-whatsapp" />
           <h1 className="font-semibold text-4xl leading-tight tracking-tight">
             L&apos;espace des agents Rabotka
           </h1>
@@ -71,7 +70,7 @@ export default function SignInPage() {
         <Link href="/" className="flex items-center gap-2.5 font-semibold lg:hidden">
           <Image src="/rabotka-logo.png" alt="" width={32} height={32} className="rounded-lg" />
           <span className="text-[15px]">
-            Rabotka <span className="font-normal text-muted-foreground">Agent</span>
+            Rabotka
           </span>
         </Link>
 
