@@ -27,8 +27,8 @@ import { cn, formatXAF } from "#/lib/utils";
 
 /**
  * A job, for the side panel over the feed and for the full /jobs/[id] page.
- * Everyone sees the public summary; signed-in agents also get pay, address
- * and description for jobs in their zones.
+ * Everyone sees the summary and the description; signed-in agents also get
+ * pay and address for jobs in their zones.
  */
 export function JobDetail({ id }: Readonly<{ id: string }>) {
   const detail = useJobDetail(id);
@@ -115,14 +115,12 @@ export function JobDetail({ id }: Readonly<{ id: string }>) {
         </section>
       )}
 
-      {agentJob?.description && (
-        <section className="space-y-1.5">
-          <h2 className="font-semibold text-sm">Description</h2>
-          <p className="whitespace-pre-line text-muted-foreground text-sm leading-relaxed">
-            {agentJob.description}
-          </p>
-        </section>
-      )}
+      <section className="space-y-1.5">
+        <h2 className="font-semibold text-sm">Description</h2>
+        <p className="whitespace-pre-line text-muted-foreground text-sm leading-relaxed">
+          {job.description?.trim() || "L'employeur n'a pas ajouté de description."}
+        </p>
+      </section>
     </article>
   );
 }
@@ -164,7 +162,7 @@ function AccessBlock({ detail }: Readonly<{ detail: JobDetailResult }>) {
     <div className="flex flex-col gap-3 rounded-2xl bg-muted/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
       <p className="flex items-start gap-2.5 text-sm">
         <IconLock className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
-        Rémunération, adresse et description sont réservées aux agents Rabotka.
+        La rémunération et l&apos;adresse sont réservées aux agents Rabotka.
       </p>
       <Button
         className="shrink-0 rounded-full px-5"

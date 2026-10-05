@@ -1,5 +1,11 @@
 import { AgentBaseController } from "./base-controller";
-import type { JobCategoryOption, JobsPage, JobsQuery, PublicJob } from "./types";
+import type {
+  JobCategoryOption,
+  JobsPage,
+  JobsQuery,
+  PublicJob,
+  PublicJobDetail,
+} from "./types";
 
 export type Country = { code: string; name: string };
 
@@ -19,7 +25,7 @@ class PublicController extends AgentBaseController {
     return this.get(this.createURL("/public/jobs", params));
   }
 
-  getJob(id: string): Promise<PublicJob> {
+  getJob(id: string): Promise<PublicJobDetail> {
     return this.get(`/public/jobs/${encodeURIComponent(id)}`);
   }
 

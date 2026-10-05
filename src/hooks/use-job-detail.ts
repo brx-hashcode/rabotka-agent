@@ -4,12 +4,12 @@ import { useSession } from "#/app/providers/session-context";
 import { getAgentJob } from "#/lib/api/agent-controller";
 import { httpStatusOf } from "#/lib/api/friendly-error";
 import { getPublicJob } from "#/lib/api/public-controller";
-import type { AgentJob, PublicJob } from "#/lib/api/types";
+import type { AgentJob, PublicJobDetail } from "#/lib/api/types";
 
 export type JobDetailResult =
   | { kind: "agent"; job: AgentJob }
   /** Anonymous visitor, or an agent looking at a job outside their zones. */
-  | { kind: "public"; job: PublicJob; outsideZones: boolean };
+  | { kind: "public"; job: PublicJobDetail; outsideZones: boolean };
 
 /**
  * One job. Signed-in agents get the full job (`agent/jobs/:id`); a job outside

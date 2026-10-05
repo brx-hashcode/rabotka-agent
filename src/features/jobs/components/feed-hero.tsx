@@ -78,7 +78,7 @@ export function FeedHero() {
 
         <form
           onSubmit={submit}
-          className="relative mt-8 flex flex-col gap-2 rounded-3xl bg-card p-2 text-foreground shadow-soft md:mt-10 md:flex-row md:items-center md:gap-0 md:rounded-full md:pl-6"
+          className="relative mt-8 flex flex-col gap-2 rounded-3xl bg-card p-2 text-foreground md:mt-10 md:flex-row md:items-center md:gap-0 md:rounded-full md:pl-6"
         >
           <label className="flex flex-1 items-center gap-3 px-4 md:px-0">
             <IconSearch className="size-5 shrink-0 text-muted-foreground" />

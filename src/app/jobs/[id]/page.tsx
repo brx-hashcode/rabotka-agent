@@ -20,7 +20,7 @@ export default async function JobPage({ params }: PageProps<"/jobs/[id]">) {
         <IconArrowLeft className="size-4" />
         Toutes les offres
       </Link>
-      <div className="rounded-3xl bg-card p-6 shadow-soft sm:p-8">
+      <div className="rounded-3xl bg-card p-6 sm:p-8">
         <JobDetail id={id} />
       </div>
     </div>

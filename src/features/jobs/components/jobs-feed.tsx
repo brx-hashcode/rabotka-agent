@@ -69,7 +69,7 @@ export function JobsFeed() {
         <div className="flex items-center gap-2">
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="ghost" className="h-10 rounded-full bg-card px-4 shadow-soft lg:hidden">
+              <Button variant="ghost" className="h-10 rounded-full bg-card px-4 lg:hidden">
                 <IconFilter />
                 Filtres{activeFilters > 0 && ` (${activeFilters})`}
               </Button>
@@ -100,7 +100,7 @@ export function JobsFeed() {
           )}
 
           {feed.isError && (
-            <div className="flex flex-col items-center gap-3 rounded-2xl bg-card p-10 text-center shadow-soft">
+            <div className="flex flex-col items-center gap-3 rounded-2xl bg-card p-10 text-center">
               <p className="text-muted-foreground text-sm">
                 {friendlyError(feed.error, "Impossible de charger les offres.")}
               </p>
@@ -112,7 +112,7 @@ export function JobsFeed() {
           )}
 
           {feed.isSuccess && feed.jobs.length === 0 && (
-            <div className="flex flex-col items-center gap-2 rounded-2xl bg-card p-10 text-center shadow-soft">
+            <div className="flex flex-col items-center gap-2 rounded-2xl bg-card p-10 text-center">
               <IconMoodEmpty className="size-8 text-muted-foreground" />
               <p className="font-medium">{emptyTitle(isAuthenticated, hasFilters)}</p>
               <p className="max-w-sm text-muted-foreground text-sm">

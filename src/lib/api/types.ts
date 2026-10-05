@@ -54,6 +54,9 @@ export type AgentJob = PublicJob & {
 
 export type JobSort = "recent" | "start";
 
+/** `GET public/jobs/:id` — the summary plus the description (toPublicJobDetail). */
+export type PublicJobDetail = PublicJob & { description: string | null };
+
 export type JobsQuery = {
   page?: number;
   limit?: number;

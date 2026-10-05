@@ -14,7 +14,7 @@ export function SortSelect() {
       onValueChange={(v) => void setFilters({ sort: v === "recent" ? null : (v as "start") })}
     >
       <SelectTrigger
-        className="h-10! gap-2 rounded-full border-0 bg-card px-4 shadow-soft"
+        className="h-10! gap-2 rounded-full border-0 bg-card px-4"
         aria-label="Trier les offres"
       >
         <SelectValue>{LABELS[sort]}</SelectValue>

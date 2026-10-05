@@ -12,7 +12,7 @@ import { SignInFlow } from "#/features/auth/components/sign-in-flow";
 export default function SignInPage() {
   return (
     <div className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center gap-6 px-4 py-10">
-      <div className="w-full max-w-sm rounded-2xl bg-card p-6 shadow-soft sm:p-8">
+      <div className="w-full max-w-sm rounded-2xl bg-card p-6 sm:p-8">
         <Suspense>
           <SignInFlow />
         </Suspense>
