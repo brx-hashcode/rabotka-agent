@@ -23,6 +23,7 @@ export function ActionDialog({
   pending,
   confirmDisabled,
   tone = "default",
+  hideCancel = false,
 }: Readonly<{
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -35,6 +36,8 @@ export function ActionDialog({
   pending?: boolean;
   confirmDisabled?: boolean;
   tone?: "default" | "warning";
+  /** A result to acknowledge, not a choice: a single full-width button. */
+  hideCancel?: boolean;
 }>) {
   return (
     <DialogPrimitive.Root
@@ -87,12 +90,14 @@ export function ActionDialog({
 
           {children}
 
-          <div className="grid grid-cols-2 gap-2">
-            <DialogPrimitive.Close asChild disabled={pending}>
-              <Button size="lg" variant="secondary" className="rounded-full">
-                Annuler
-              </Button>
-            </DialogPrimitive.Close>
+          <div className={cn("grid gap-2", !hideCancel && "grid-cols-2")}>
+            {!hideCancel && (
+              <DialogPrimitive.Close asChild disabled={pending}>
+                <Button size="lg" variant="secondary" className="rounded-full">
+                  Annuler
+                </Button>
+              </DialogPrimitive.Close>
+            )}
             <Button
               size="lg"
               className="rounded-full"

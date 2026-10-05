@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   claimLead,
   getCandidates,
+  inviteLead,
   logCall,
   revealPhone,
 } from "#/lib/api/agent-controller";
@@ -62,5 +63,14 @@ export function useLogCall(jobId: string) {
     }) => logCall(leadId, outcome, note),
     // A closing outcome removes the worker from the suggestions; refetch.
     onSuccess: () => queryClient.invalidateQueries({ queryKey: candidatesKey(jobId) }),
+  });
+}
+
+/** Places the worker: issues the invitation and updates the lead in the list. */
+export function useInviteLead(jobId: string) {
+  const write = useLeadWriter(jobId);
+  return useMutation({
+    mutationFn: inviteLead,
+    onSuccess: (result) => write(result.lead),
   });
 }

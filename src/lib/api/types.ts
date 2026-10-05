@@ -149,3 +149,16 @@ export type PhoneReveal = {
   directPhone: string | null;
   revealsLeftToday: number;
 };
+
+/** `POST agent/leads/:id/invite` — the placement invitation. */
+export type LeadInvite = {
+  inviteUrl: string;
+  expiresAt: string;
+  /** Ready-to-send text, with the link. */
+  message: string;
+  /** True when Rabotka itself sent the invitation to the worker by WhatsApp. */
+  sentToWorker: boolean;
+  /** Pre-filled wa.me link; only once this agent revealed the worker's number. */
+  whatsappUrl: string | null;
+  lead: AgentLead;
+};

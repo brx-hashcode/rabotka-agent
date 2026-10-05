@@ -6,6 +6,7 @@ import type {
   AgentSelf,
   CallOutcome,
   JobsPage,
+  LeadInvite,
   JobsQuery,
   PhoneReveal,
 } from "./types";
@@ -49,6 +50,11 @@ class AgentController extends AgentBaseController {
     return this.post(`/agent/leads/${encodeURIComponent(leadId)}/reveal-phone`);
   }
 
+  /** Issue (or re-issue) the invitation that places the worker on the job. */
+  inviteLead(leadId: string): Promise<LeadInvite> {
+    return this.post(`/agent/leads/${encodeURIComponent(leadId)}/invite`);
+  }
+
   logCall(leadId: string, outcome: CallOutcome, note?: string): Promise<AgentLead> {
     return this.post(`/agent/leads/${encodeURIComponent(leadId)}/calls`, {
       outcome,
@@ -66,3 +72,4 @@ export const getCandidates = controller.getCandidates.bind(controller);
 export const claimLead = controller.claimLead.bind(controller);
 export const revealPhone = controller.revealPhone.bind(controller);
 export const logCall = controller.logCall.bind(controller);
+export const inviteLead = controller.inviteLead.bind(controller);

@@ -1,70 +1,86 @@
 "use client";
 
-import { IconLogout, IconMapPin } from "@tabler/icons-react";
+import { IconChevronDown, IconLogout, IconMapPin } from "@tabler/icons-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "#/components/ui/dropdown-menu";
 import { useAgentMe } from "#/hooks/use-agent-me";
 import { useLogoutMutation } from "#/hooks/use-auth-mutations";
 import { getInitials } from "#/lib/utils";
 
+/** The signed-in agent in the header: avatar, name, zones, sign-out. */
 export function AgentMenu() {
   const { data: agent } = useAgentMe();
   const logout = useLogoutMutation();
-  const name = agent ? `${agent.firstName} ${agent.lastName}` : "";
+  const name = agent ? `${agent.firstName} ${agent.lastName}`.trim() : "";
+
+  const avatar = (size: string) => (
+    <Avatar className={size}>
+      {agent?.avatarUrl && <AvatarImage src={agent.avatarUrl} alt={name} />}
+      <AvatarFallback className="bg-whatsapp/15 font-medium text-whatsapp-dark">
+        {agent ? getInitials(name) : ""}
+      </AvatarFallback>
+    </Avatar>
+  );
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="flex items-center gap-3 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="group flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-whatsapp/50 sm:pl-3"
         aria-label="Mon compte"
       >
         {agent && (
-          <span className="hidden font-medium text-sm sm:inline">{name}</span>
+          <span className="hidden max-w-40 truncate font-medium text-sm sm:inline">{name}</span>
         )}
-        <Avatar className="size-9 ring-2 ring-white/10">
-          {agent?.avatarUrl && <AvatarImage src={agent.avatarUrl} alt={name} />}
-          <AvatarFallback>{agent ? getInitials(name) : ""}</AvatarFallback>
-        </Avatar>
+        {avatar("size-9 ring-2 ring-white/15")}
+        <IconChevronDown className="hidden size-4 text-header-muted transition-transform group-data-[state=open]:rotate-180 sm:block" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
-        <DropdownMenuLabel className="space-y-0.5">
-          <p className="truncate font-medium">{name || "Agent"}</p>
-          {agent && (
-            <p className="truncate font-normal text-muted-foreground text-xs">
-              {agent.email}
-            </p>
-          )}
-        </DropdownMenuLabel>
+
+      <DropdownMenuContent
+        align="end"
+        sideOffset={10}
+        className="w-80 rounded-3xl border-0 bg-card p-2 shadow-soft"
+      >
+        <div className="flex items-center gap-3 rounded-2xl bg-page p-3">
+          {avatar("size-12")}
+          <div className="min-w-0">
+            <p className="truncate font-semibold">{name || "Agent"}</p>
+            {agent && <p className="truncate text-muted-foreground text-sm">{agent.email}</p>}
+          </div>
+        </div>
+
         {agent && agent.zones.length > 0 && (
-          <>
-            <DropdownMenuSeparator />
-            <div className="flex flex-wrap gap-1.5 px-2 py-1.5">
+          <div className="space-y-2 px-3 pt-4 pb-3">
+            <p className="font-medium text-muted-foreground text-xs">Vos zones</p>
+            <div className="flex flex-wrap gap-1.5">
               {agent.zones.map((z) => (
                 <span
                   key={`${z.countryCode}-${z.city}`}
-                  className="inline-flex items-center gap-1 rounded-md bg-muted px-2 py-0.5 text-xs"
+                  className="inline-flex items-center gap-1 rounded-full bg-chip-green px-2.5 py-1 font-medium text-chip-green-foreground text-xs"
                 >
-                  <IconMapPin className="size-3" />
+                  <IconMapPin className="size-3.5" />
                   {z.city}
                 </span>
               ))}
             </div>
-          </>
+          </div>
         )}
-        <DropdownMenuSeparator />
+
+        <div aria-hidden className="mx-3 my-1 h-px bg-border/70" />
+
         <DropdownMenuItem
           onSelect={() => logout.mutate()}
           disabled={logout.isPending}
+          className="cursor-pointer gap-3 rounded-2xl px-3 py-2.5 text-sm focus:bg-page"
         >
-          <IconLogout />
+          <span className="flex size-8 items-center justify-center rounded-full bg-page">
+            <IconLogout className="size-4" />
+          </span>
           Se déconnecter
         </DropdownMenuItem>
       </DropdownMenuContent>

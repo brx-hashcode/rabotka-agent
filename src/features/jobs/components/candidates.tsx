@@ -13,6 +13,10 @@ import {
   IconThumbDown,
   IconThumbUp,
   IconUserCheck,
+  IconUserPlus,
+  IconSend,
+  IconCopy,
+  IconCircleCheck,
   IconRosetteDiscountCheckFilled,
   IconLock,
   IconPhone,
@@ -29,11 +33,18 @@ import { Textarea } from "#/components/ui/textarea";
 import {
   useCandidates,
   useClaimLead,
+  useInviteLead,
   useLogCall,
   useRevealPhone,
 } from "#/hooks/use-candidates";
 import { friendlyError } from "#/lib/api/friendly-error";
-import type { AgentCandidate, AgentLead, CallOutcome, PhoneReveal } from "#/lib/api/types";
+import type {
+  AgentCandidate,
+  AgentLead,
+  CallOutcome,
+  LeadInvite,
+  PhoneReveal,
+} from "#/lib/api/types";
 import { cn, getInitials } from "#/lib/utils";
 import { ActionDialog } from "./action-dialog";
 
@@ -254,7 +265,9 @@ function MyLead({
   }).data;
   const reveal = useRevealPhone();
   const logCall = useLogCall(jobId);
-  const [dialog, setDialog] = useState<"reveal" | "call" | null>(null);
+  const invite = useInviteLead(jobId);
+  const [dialog, setDialog] = useState<"reveal" | "call" | "place" | null>(null);
+  const [sent, setSent] = useState<LeadInvite | null>(null);
   const [outcome, setOutcome] = useState<CallOutcome | null>(null);
   const [note, setNote] = useState("");
   const selected = OUTCOMES.find((o) => o.value === outcome);
@@ -345,6 +358,80 @@ function MyLead({
         }
       />
 
+      <Placement lead={lead} workerName={workerName} onPlace={() => setDialog("place")} />
+
+      <ActionDialog
+        open={dialog === "place"}
+        onOpenChange={(open) => setDialog(open ? "place" : null)}
+        icon={<IconSend className="size-5" />}
+        title={`Placer ${workerName} sur l'offre ?`}
+        description={`Rabotka crée une invitation personnelle à cette offre pour ${workerName}. Dès qu'il ou elle l'accepte, sa candidature est créée et le placement vous est attribué.${lead.status === "INVITED" ? " Le nouveau lien remplace le précédent." : ""}`}
+        confirmLabel={lead.status === "INVITED" ? "Renvoyer l'invitation" : "Envoyer l'invitation"}
+        pending={invite.isPending}
+        onConfirm={() =>
+          invite.mutate(lead.id, {
+            onSuccess: (result) => {
+              setDialog(null);
+              setSent(result);
+            },
+            onError: (err) => {
+              setDialog(null);
+              toast.error(friendlyError(err, "Impossible d'envoyer l'invitation."));
+            },
+          })
+        }
+      />
+
+      {sent && (
+        <ActionDialog
+          open
+          onOpenChange={(open) => !open && setSent(null)}
+          icon={<IconCircleCheck className="size-5" />}
+          title="Invitation envoyée"
+          description={
+            sent.sentToWorker
+              ? `Rabotka a envoyé l'invitation à ${workerName} sur WhatsApp. Vous pouvez aussi la lui transmettre vous-même.`
+              : `Envoyez maintenant l'invitation à ${workerName} : par WhatsApp ou en copiant le lien.`
+          }
+          confirmLabel="Terminé"
+          hideCancel
+          onConfirm={() => setSent(null)}
+        >
+          <p className="whitespace-pre-line rounded-2xl bg-page px-4 py-3 text-sm leading-relaxed">
+            {sent.message}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            Le lien expire le {format(new Date(sent.expiresAt), "d MMM 'à' HH'h'mm", { locale: fr })}.
+          </p>
+          <div className={cn("grid gap-2", sent.whatsappUrl && "grid-cols-2")}>
+            {sent.whatsappUrl && (
+              <Button
+                size="lg"
+                variant="secondary"
+                className="rounded-full"
+                render={<a href={sent.whatsappUrl} target="_blank" rel="noreferrer" />}
+              >
+                <IconBrandWhatsapp />
+                WhatsApp
+              </Button>
+            )}
+            <Button
+              size="lg"
+              variant="secondary"
+              className="rounded-full"
+              onClick={() =>
+                void navigator.clipboard
+                  .writeText(sent.message)
+                  .then(() => toast.success("Message copié"))
+              }
+            >
+              <IconCopy />
+              Copier le message
+            </Button>
+          </div>
+        </ActionDialog>
+      )}
+
       <Button
         size="lg"
         variant="ghost"
@@ -375,11 +462,11 @@ function MyLead({
             {
               onSuccess: () => {
                 setDialog(null);
-                toast.success(
-                  selected?.closes
-                    ? `Appel enregistré. ${workerName} sort de vos suggestions.`
-                    : "Appel enregistré.",
-                );
+                let message = "Appel enregistré.";
+                if (selected?.closes) message = `Appel enregistré. ${workerName} sort de vos suggestions.`;
+                else if (outcome === "INTERESTED")
+                  message = `Appel enregistré. Vous pouvez maintenant placer ${workerName} sur l'offre.`;
+                toast.success(message);
               },
               onError: (err) => toast.error(friendlyError(err, "Impossible d'enregistrer l'appel.")),
             },
@@ -429,6 +516,54 @@ function MyLead({
         />
       </ActionDialog>
     </div>
+  );
+}
+
+/**
+ * Placing = sending the invitation. Offered once the last call ended with
+ * "Intéressé"; once sent, shows its state and lets the agent send it again.
+ */
+function Placement({
+  lead,
+  workerName,
+  onPlace,
+}: Readonly<{ lead: AgentLead; workerName: string; onPlace: () => void }>) {
+  if (lead.status === "INVITED") {
+    const expires = lead.inviteExpiresAt ? new Date(lead.inviteExpiresAt) : null;
+    return (
+      <div className="flex flex-col gap-2 rounded-xl bg-card p-3">
+        <p className="flex items-center gap-2 font-medium text-sm">
+          <IconSend
+            className={cn("size-4", lead.inviteLapsed ? "text-muted-foreground" : "text-whatsapp-dark")}
+          />
+          {lead.inviteLapsed ? "Invitation expirée" : `Invitation envoyée à ${workerName}`}
+        </p>
+        <p className="text-muted-foreground text-xs">
+          {lead.inviteLapsed || !expires
+            ? `${workerName} n'a pas répondu à temps. Renvoyez-lui un nouveau lien.`
+            : `En attente de sa réponse · le lien expire le ${format(expires, "d MMM 'à' HH'h'mm", { locale: fr })}.`}
+        </p>
+        <Button size="lg" variant="secondary" className="rounded-full" onClick={onPlace}>
+          <IconSend />
+          Renvoyer l&apos;invitation
+        </Button>
+      </div>
+    );
+  }
+
+  if (lead.lastCall?.outcome === "INTERESTED") {
+    return (
+      <Button size="lg" className="w-full rounded-full" onClick={onPlace}>
+        <IconUserPlus />
+        Placer {workerName} sur l&apos;offre
+      </Button>
+    );
+  }
+
+  return (
+    <p className="px-1 text-muted-foreground text-xs">
+      Après un appel concluant (« Intéressé »), vous pourrez placer {workerName} sur l&apos;offre.
+    </p>
   );
 }
 
