@@ -10,8 +10,6 @@ import type { JobFacets } from "#/lib/api/types";
 import { EMPLOYMENT_TYPE_LABELS } from "#/lib/job-labels";
 import { formatXAF } from "#/lib/utils";
 
-const CATEGORIES_SHOWN = 8;
-
 /** Number of active sidebar filters (for the mobile "Filtres (n)" button). */
 export function useActiveFilterCount() {
   const [f] = useFeedFilters();
@@ -29,7 +27,6 @@ export function FiltersSidebar({
 }: Readonly<{ facets: JobFacets | undefined; showPay: boolean }>) {
   const [f, setFilters] = useFeedFilters();
   const categories = useJobCategories();
-  const [showAll, setShowAll] = useState(false);
   const hasAny = f.types.length > 0 || f.categories.length > 0 || f.min !== null || f.max !== null;
 
   function toggle<T extends string>(list: T[], value: T): T[] | null {
@@ -40,7 +37,6 @@ export function FiltersSidebar({
   const sortedCategories = [...(categories.data ?? [])].sort(
     (a, b) => (facets?.category[b.slug] ?? 0) - (facets?.category[a.slug] ?? 0),
   );
-  const visible = showAll ? sortedCategories : sortedCategories.slice(0, CATEGORIES_SHOWN);
 
   return (
     <div className="flex flex-col gap-8">
@@ -76,35 +72,29 @@ export function FiltersSidebar({
       )}
 
       <FilterGroup title="Catégories">
-        {categories.isPending &&
-          Array.from({ length: 5 }, (_, i) => (
-            <div key={i} className="h-5 animate-pulse rounded bg-muted" />
+        {/* Scrolls inside its own box rather than stretching the page. */}
+        <div className="-mr-2 flex max-h-72 flex-col gap-2.5 overflow-y-auto overscroll-contain pr-2">
+          {categories.isPending &&
+            Array.from({ length: 5 }, (_, i) => (
+              <div key={i} className="h-5 animate-pulse rounded bg-muted" />
+            ))}
+          {sortedCategories.map((c) => (
+            <CheckRow
+              key={c.id}
+              label={
+                <>
+                  <span aria-hidden className="mr-1.5">
+                    {c.icon ?? "💼"}
+                  </span>
+                  {c.name}
+                </>
+              }
+              count={facets?.category[c.slug]}
+              checked={f.categories.includes(c.slug)}
+              onChange={() => void setFilters({ categories: toggle(f.categories, c.slug) })}
+            />
           ))}
-        {visible.map((c) => (
-          <CheckRow
-            key={c.id}
-            label={
-              <>
-                <span aria-hidden className="mr-1.5">
-                  {c.icon ?? "💼"}
-                </span>
-                {c.name}
-              </>
-            }
-            count={facets?.category[c.slug]}
-            checked={f.categories.includes(c.slug)}
-            onChange={() => void setFilters({ categories: toggle(f.categories, c.slug) })}
-          />
-        ))}
-        {sortedCategories.length > CATEGORIES_SHOWN && (
-          <button
-            type="button"
-            onClick={() => setShowAll((v) => !v)}
-            className="self-start font-medium text-sm text-whatsapp-dark hover:underline"
-          >
-            {showAll ? "Voir moins" : `Voir tout (${sortedCategories.length})`}
-          </button>
-        )}
+        </div>
       </FilterGroup>
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { IconChevronLeft, IconMap2, IconX } from "@tabler/icons-react";
+import { IconCheck, IconChevronLeft, IconMap2, IconX } from "@tabler/icons-react";
 
 import {
   Command,
@@ -15,6 +15,21 @@ import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover
 import { useCities, useCountries } from "#/hooks/use-geo";
 
 export type Place = { country: string; city: string };
+
+/**
+ * Styled like the hero's search pill: borderless, rounded, soft shadow, with a
+ * pill-shaped search field. The list scrolls inside the popup and never hands
+ * the wheel over to the page (`overscroll-contain`).
+ */
+const COMMAND_STYLE =
+  "bg-transparent [&_[data-slot=command-input-wrapper]]:mb-2 [&_[data-slot=command-input-wrapper]]:h-11 [&_[data-slot=command-input-wrapper]]:rounded-full [&_[data-slot=command-input-wrapper]]:border-0 [&_[data-slot=command-input-wrapper]]:bg-muted [&_[data-slot=command-input-wrapper]]:px-4";
+const LIST_STYLE = "max-h-64 overscroll-contain pr-1";
+const ITEM_STYLE =
+  "cursor-pointer justify-between rounded-xl px-3 py-2.5 text-[15px] data-[selected=true]:bg-muted";
+
+function Selected({ on }: Readonly<{ on: boolean }>) {
+  return on ? <IconCheck className="size-4 text-whatsapp-dark" /> : null;
+}
 
 /**
  * "Ajouter un pays ou une ville": pick a country, then optionally one of its
@@ -67,28 +82,42 @@ export function LocationPicker({
         )}
       </div>
 
-      <PopoverContent align="start" sideOffset={14} className="w-80 p-0">
-        <Command>
+      <PopoverContent
+        align="start"
+        sideOffset={18}
+        className="w-80 rounded-3xl border-0 bg-card shadow-soft before:hidden"
+      >
+        <Command className={COMMAND_STYLE}>
           {country ? (
             <>
               <button
                 type="button"
                 onClick={() => setCountry("")}
-                className="flex w-full items-center gap-1 px-3 pt-3 pb-1 text-muted-foreground text-xs hover:text-foreground"
+                className="mb-2 flex items-center gap-1 self-start rounded-full px-2 py-1 text-muted-foreground text-xs hover:bg-muted hover:text-foreground"
               >
                 <IconChevronLeft className="size-3.5" />
                 Changer de pays
               </button>
               <CommandInput placeholder="Rechercher une ville" />
-              <CommandList>
+              <CommandList className={LIST_STYLE}>
                 <CommandEmpty>Aucune ville trouvée.</CommandEmpty>
                 <CommandGroup>
-                  <CommandItem onSelect={() => pick({ country, city: "" })}>
+                  <CommandItem
+                    className={ITEM_STYLE}
+                    onSelect={() => pick({ country, city: "" })}
+                  >
                     Tout le pays
+                    <Selected on={value.country === country && !value.city} />
                   </CommandItem>
                   {cities.data?.map((city) => (
-                    <CommandItem key={city} value={city} onSelect={() => pick({ country, city })}>
+                    <CommandItem
+                      key={city}
+                      value={city}
+                      className={ITEM_STYLE}
+                      onSelect={() => pick({ country, city })}
+                    >
                       {city}
+                      <Selected on={value.country === country && value.city === city} />
                     </CommandItem>
                   ))}
                 </CommandGroup>
@@ -97,16 +126,18 @@ export function LocationPicker({
           ) : (
             <>
               <CommandInput placeholder="Rechercher un pays" />
-              <CommandList>
+              <CommandList className={LIST_STYLE}>
                 <CommandEmpty>Aucun pays trouvé.</CommandEmpty>
                 <CommandGroup>
                   {countries.data?.map((c) => (
                     <CommandItem
                       key={c.code}
                       value={`${c.name} ${c.code}`}
+                      className={ITEM_STYLE}
                       onSelect={() => setCountry(c.code)}
                     >
                       {c.name}
+                      <Selected on={value.country === c.code} />
                     </CommandItem>
                   ))}
                 </CommandGroup>
