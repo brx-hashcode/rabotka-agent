@@ -90,3 +90,62 @@ export type JobCategoryOption = JobCategory & {
   icon: string | null;
   description: string | null;
 };
+
+export type LeadStatus =
+  | "SUGGESTED"
+  | "CLAIMED"
+  | "INVITED"
+  | "CONFIRMED"
+  | "DECLINED"
+  | "UNREACHABLE";
+
+export type CallOutcome =
+  | "INTERESTED"
+  | "CALL_BACK"
+  | "NOT_AVAILABLE"
+  | "NOT_INTERESTED"
+  | "UNREACHABLE"
+  | "WRONG_NUMBER";
+
+/** One (job, worker) pair as this agent sees it (backend `leadView`). */
+export type AgentLead = {
+  id: string;
+  status: LeadStatus;
+  /** This agent holds a live claim. */
+  mine: boolean;
+  /** Nobody holds it (or a claim/invitation lapsed): it can be taken. */
+  available: boolean;
+  claimExpiresAt: string | null;
+  invitedAt: string | null;
+  inviteExpiresAt: string | null;
+  inviteLapsed: boolean;
+  applicationId: string | null;
+  decidedAt: string | null;
+  updatedAt: string;
+  lastCall: { outcome: CallOutcome; note: string | null; at: string } | null;
+};
+
+/** `GET agent/jobs/:id/candidates` — no contact details (toAgentCandidate). */
+export type AgentCandidate = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  avatarUrl: string | null;
+  description: string | null;
+  city: string | null;
+  reliabilityScore: number | null;
+  ratingAvg: number | null;
+  ratingCount: number;
+  verificationStatus: string;
+  categories: string[];
+  /** Match score, 0–1. */
+  score: number;
+  lead: AgentLead | null;
+};
+
+/** `POST agent/leads/:id/reveal-phone` — logged, capped per day. */
+export type PhoneReveal = {
+  phone: string | null;
+  directPhone: string | null;
+  revealsLeftToday: number;
+};

@@ -15,6 +15,7 @@ import {
   IconMapPin,
   IconShare,
   IconUsers,
+  IconUsersGroup,
   IconX,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -35,59 +36,113 @@ import {
 } from "#/lib/job-labels";
 import { cn, formatXAF } from "#/lib/utils";
 
-type Variant = "page" | "panel";
+/** Shares a job link: the phone's share sheet, or a copied link. */
+export async function shareJob(title: string, jobPath: string) {
+  const url = `${globalThis.location.origin}${jobPath}`;
+  if (navigator.share) {
+    await navigator.share({ title, url }).catch(() => undefined);
+    return;
+  }
+  await navigator.clipboard.writeText(url);
+  toast.success("Lien de l'offre copié");
+}
 
-/**
- * A job, for the side panel over the feed (full screen on phones) and for the
- * full /jobs/[id] page. Everyone sees the summary and the description;
- * signed-in agents also get pay and address for jobs in their zones.
- */
-export function JobDetail({
-  id,
-  variant = "page",
-}: Readonly<{
-  id: string;
-  /** "panel": inside the side panel — close button in the top bar. */
-  variant?: Variant;
-}>) {
+
+export function JobDetail({ id }: Readonly<{ id: string }>) {
   const detail = useJobDetail(id);
-  const categories = useJobCategories();
   const jobPath = `/jobs/${id}`;
 
   if (detail.isPending) {
     return (
-      <Shell variant={variant} jobPath={jobPath}>
+      <Shell jobPath={jobPath}>
         <JobDetailSkeleton />
       </Shell>
     );
   }
 
   if (detail.isError) {
-    const notFound = httpStatusOf(detail.error) === 404;
     return (
-      <Shell variant={variant} jobPath={jobPath}>
-        <div className="flex flex-col items-center gap-2 py-16 text-center">
-          <p className="font-semibold">
-            {notFound ? "Offre introuvable" : "Impossible de charger l'offre"}
-          </p>
-          <p className="max-w-xs text-muted-foreground text-sm">
-            {notFound
-              ? "Elle a été pourvue, retirée ou n'existe pas."
-              : friendlyError(detail.error, "Réessayez dans un instant.")}
-          </p>
-          <Button variant="secondary" className="mt-3 rounded-full" render={<Link href="/" />}>
-            Voir les offres ouvertes
-          </Button>
-        </div>
+      <Shell jobPath={jobPath}>
+        <JobLoadError error={detail.error} />
       </Shell>
     );
   }
 
-  const { job } = detail.data;
-  const agentJob = detail.data.kind === "agent" ? detail.data.job : null;
   const anonymous = detail.data.kind === "public" && !detail.data.outsideZones;
+  let footer: ReactNode = null;
+  if (anonymous) {
+    footer = (
+      <Button
+        size="xl"
+        className="w-full rounded-full"
+        render={<Link href={`/auth/sign-in?next=${encodeURIComponent(jobPath)}`} scroll={false} />}
+      >
+        Se connecter pour voir la rémunération
+      </Button>
+    );
+  } else if (detail.data.kind === "agent") {
+    footer = (
+      <Button size="xl" className="w-full rounded-full" render={<a href={jobPath} />}>
+        <IconUsersGroup />
+        Voir les travailleurs suggérés
+      </Button>
+    );
+  }
+
+  return (
+    <Shell jobPath={jobPath} shareTitle={detail.data.job.title} footer={footer}>
+      <JobSummary detail={detail.data} />
+    </Shell>
+  );
+}
+
+export function JobHeader({
+  job,
+  className,
+}: Readonly<{ job: JobDetailResult["job"]; className?: string }>) {
+  const categories = useJobCategories();
   const icon = categories.data?.find((c) => c.slug === job.category?.slug)?.icon;
   const startChip = jobStartShort(job.scheduledAt);
+
+  return (
+    <header className={cn("flex flex-col gap-4", className)}>
+      <div className="flex items-start gap-4">
+        <span
+          aria-hidden
+          className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-page text-2xl"
+        >
+          {icon ?? "💼"}
+        </span>
+        <div className="min-w-0 space-y-1 pt-0.5">
+          <h1 className="font-semibold text-xl leading-snug tracking-tight sm:text-2xl">
+            {job.title}
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            {job.category?.name ?? "Sans catégorie"}
+            <span className="mx-1.5">•</span>
+            <span className={cn(job.seatsLeft <= 0 && "text-destructive")}>
+              {seatsLabel(job.seatsLeft)}
+            </span>
+          </p>
+        </div>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        <Chip tone="violet">
+          {EMPLOYMENT_TYPE_LABELS[job.employmentType] ?? job.employmentType}
+        </Chip>
+        <Chip tone="green">{jobPlaceShort(job)}</Chip>
+        {startChip && <Chip tone="amber">{startChip}</Chip>}
+      </div>
+    </header>
+  );
+}
+
+export function JobSummary({
+  detail,
+  headerClassName,
+}: Readonly<{ detail: JobDetailResult; headerClassName?: string }>) {
+  const { job } = detail;
+  const agentJob = detail.kind === "agent" ? detail.job : null;
 
   const facts: { icon: typeof IconMapPin; label: string; value: string }[] = [
     {
@@ -116,94 +171,66 @@ export function JobDetail({
   ];
 
   return (
-    <Shell
-      variant={variant}
-      jobPath={jobPath}
-      shareTitle={job.title}
-      footer={
-        anonymous ? (
-          <Button
-            size="xl"
-            className="w-full rounded-full"
-            render={
-              <Link href={`/auth/sign-in?next=${encodeURIComponent(jobPath)}`} scroll={false} />
-            }
-          >
-            Se connecter pour voir la rémunération
-          </Button>
-        ) : null
-      }
-    >
-      <article className="flex flex-col gap-6">
-        <header className="flex flex-col gap-4">
-          <div className="flex items-start gap-4">
-            <span
-              aria-hidden
-              className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-page text-2xl"
-            >
-              {icon ?? "💼"}
+    <article className="flex flex-col gap-6">
+      <JobHeader job={job} className={headerClassName} />
+
+      <PayBlock detail={detail} />
+
+      <section className="space-y-2">
+        <h2 className="font-semibold text-sm">Détails</h2>
+        <dl className="divide-y divide-card overflow-hidden rounded-2xl bg-page">
+          {facts.map(({ icon: Icon, label, value }) => (
+            <div key={label} className="flex items-start gap-3 px-4 py-3 text-sm">
+              <dt className="flex w-28 shrink-0 items-center gap-2 text-muted-foreground">
+                <Icon className="size-4 shrink-0" />
+                {label}
+              </dt>
+              <dd className="min-w-0 flex-1 wrap-break-word text-right font-medium">{value}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="font-semibold text-sm">Description</h2>
+        {job.description?.trim() ? (
+          <p className="whitespace-pre-line rounded-2xl bg-page px-4 py-4 text-sm leading-relaxed">
+            {job.description.trim()}
+          </p>
+        ) : (
+          <div className="flex items-center gap-3 rounded-2xl bg-page px-4 py-4">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-card text-muted-foreground">
+              <IconFileDescription className="size-4.5" />
             </span>
-            <div className="min-w-0 space-y-1 pt-0.5">
-              <h1 className="font-semibold text-xl leading-snug tracking-tight sm:text-2xl">
-                {job.title}
-              </h1>
-              <p className="text-muted-foreground text-sm">
-                {job.category?.name ?? "Sans catégorie"}
-                <span className="mx-1.5">•</span>
-                <span className={cn(job.seatsLeft <= 0 && "text-destructive")}>
-                  {seatsLabel(job.seatsLeft)}
-                </span>
+            <div>
+              <p className="font-medium text-sm">Pas encore de description</p>
+              <p className="text-muted-foreground text-xs">
+                L&apos;employeur n&apos;a rien précisé pour le moment.
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            <Chip tone="violet">
-              {EMPLOYMENT_TYPE_LABELS[job.employmentType] ?? job.employmentType}
-            </Chip>
-            <Chip tone="green">{jobPlaceShort(job)}</Chip>
-            {startChip && <Chip tone="amber">{startChip}</Chip>}
-          </div>
-        </header>
+        )}
+      </section>
+    </article>
+  );
+}
 
-        <PayBlock detail={detail.data} />
-
-        <section className="space-y-2">
-          <h2 className="font-semibold text-sm">Détails</h2>
-          <dl className="divide-y divide-card overflow-hidden rounded-2xl bg-page">
-            {facts.map(({ icon: Icon, label, value }) => (
-              <div key={label} className="flex items-start gap-3 px-4 py-3 text-sm">
-                <dt className="flex w-28 shrink-0 items-center gap-2 text-muted-foreground">
-                  <Icon className="size-4 shrink-0" />
-                  {label}
-                </dt>
-                <dd className="min-w-0 flex-1 wrap-break-word text-right font-medium">{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-
-        <section className="space-y-2">
-          <h2 className="font-semibold text-sm">Description</h2>
-          {job.description?.trim() ? (
-            <p className="whitespace-pre-line rounded-2xl bg-page px-4 py-4 text-sm leading-relaxed">
-              {job.description.trim()}
-            </p>
-          ) : (
-            <div className="flex items-center gap-3 rounded-2xl bg-page px-4 py-4">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-card text-muted-foreground">
-                <IconFileDescription className="size-4.5" />
-              </span>
-              <div>
-                <p className="font-medium text-sm">Pas encore de description</p>
-                <p className="text-muted-foreground text-xs">
-                  L&apos;employeur n&apos;a rien précisé pour le moment.
-                </p>
-              </div>
-            </div>
-          )}
-        </section>
-      </article>
-    </Shell>
+export function JobLoadError({ error }: Readonly<{ error: unknown }>) {
+  const notFound = httpStatusOf(error) === 404;
+  return (
+    <div className="flex flex-col items-center gap-2 py-16 text-center">
+      <p className="font-semibold">
+        {notFound ? "Offre introuvable" : "Impossible de charger l'offre"}
+      </p>
+      <p className="max-w-xs text-muted-foreground text-sm">
+        {notFound
+          ? "Elle a été pourvue, retirée ou n'existe pas."
+          : friendlyError(error, "Réessayez dans un instant.")}
+      </p>
+      <Button variant="secondary" className="mt-3 rounded-full" render={<Link href="/" />}>
+        Voir les offres ouvertes
+      </Button>
+    </div>
   );
 }
 
@@ -212,63 +239,34 @@ function freeSeatsLabel(seatsLeft: number, quantity: number): string {
   return `${free} libre${free > 1 ? "s" : ""} sur ${quantity}`;
 }
 
-/**
- * Top bar (back or close, and share), the content, and an optional footer.
- * In the panel the bars stick to the top and bottom of its scroll area.
- */
+/** The panel's sticky top bar (close, share), the content and a sticky footer. */
 function Shell({
-  variant,
   jobPath,
   shareTitle,
   footer,
   children,
 }: Readonly<{
-  variant: Variant;
   jobPath: string;
   shareTitle?: string;
   footer?: ReactNode;
   children: ReactNode;
 }>) {
   const router = useRouter();
-  const panel = variant === "panel";
-
-  async function share() {
-    const url = `${globalThis.location.origin}${jobPath}`;
-    if (navigator.share) {
-      await navigator.share({ title: shareTitle, url }).catch(() => undefined);
-      return;
-    }
-    await navigator.clipboard.writeText(url);
-    toast.success("Lien de l'offre copié");
-  }
-
-  const roundButton =
-    "inline-flex size-10 items-center justify-center rounded-full bg-page text-foreground transition-colors hover:bg-muted";
 
   return (
     <div className="flex flex-1 flex-col">
-      <div
-        className={cn(
-          "flex items-center justify-between gap-3 pb-4",
-          panel && "sticky top-0 z-10 -mx-4 bg-card/95 px-4 pt-3 backdrop-blur md:-mx-8 md:px-8 md:pt-5",
-        )}
-      >
-        {panel ? (
-          <button type="button" onClick={() => router.back()} className={roundButton} aria-label="Fermer">
-            <IconArrowLeft className="size-5 md:hidden" />
-            <IconX className="hidden size-5 md:block" />
-          </button>
-        ) : (
-          <Link
-            href="/"
-            className="-ml-2 inline-flex items-center gap-1.5 rounded-full px-2 py-1.5 text-muted-foreground text-sm hover:bg-page hover:text-foreground"
-          >
-            <IconArrowLeft className="size-4" />
-            Toutes les offres
-          </Link>
-        )}
+      <div className="sticky top-0 z-10 -mx-4 flex items-center justify-between gap-3 bg-card/95 px-4 pt-3 pb-4 backdrop-blur md:-mx-8 md:px-8 md:pt-5">
+        <button type="button" onClick={() => router.back()} className={ROUND_BUTTON} aria-label="Fermer">
+          <IconArrowLeft className="size-5 md:hidden" />
+          <IconX className="hidden size-5 md:block" />
+        </button>
         {shareTitle && (
-          <button type="button" onClick={() => void share()} className={roundButton} aria-label="Partager l'offre">
+          <button
+            type="button"
+            onClick={() => void shareJob(shareTitle, jobPath)}
+            className={ROUND_BUTTON}
+            aria-label="Partager l'offre"
+          >
             <IconShare className="size-4.5" />
           </button>
         )}
@@ -277,18 +275,16 @@ function Shell({
       <div className="flex-1 pb-8">{children}</div>
 
       {footer && (
-        <div
-          className={cn(
-            "pb-5",
-            panel && "sticky bottom-0 -mx-4 bg-card/95 px-4 pt-3 backdrop-blur md:-mx-8 md:px-8",
-          )}
-        >
+        <div className="sticky bottom-0 -mx-4 bg-card/95 px-4 pt-3 pb-5 backdrop-blur md:-mx-8 md:px-8">
           {footer}
         </div>
       )}
     </div>
   );
 }
+
+export const ROUND_BUTTON =
+  "inline-flex size-10 items-center justify-center rounded-full bg-page text-foreground transition-colors hover:bg-muted";
 
 /** Pay for agents; otherwise why the visitor sees only the summary. */
 function PayBlock({ detail }: Readonly<{ detail: JobDetailResult }>) {
@@ -343,7 +339,7 @@ function Chip({ tone, children }: Readonly<{ tone: keyof typeof TONES; children:
   );
 }
 
-function JobDetailSkeleton() {
+export function JobDetailSkeleton() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex gap-4">
