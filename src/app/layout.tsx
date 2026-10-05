@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 
 import { Providers } from "#/app/providers";
+import { SiteHeader } from "#/features/layout/components/site-header";
+import { REFRESH_COOKIE } from "#/lib/auth/cookies";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,11 +21,21 @@ export const viewport: Viewport = {
   themeColor: "#0F172A",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+/**
+ * `modal` is the parallel-route slot that renders /auth/sign-in as a dialog
+ * when it is reached by a link from inside the app (src/app/@modal).
+ */
+export default async function RootLayout({ children, modal }: LayoutProps<"/">) {
+  const isAuthenticated = (await cookies()).has(REFRESH_COOKIE);
+
   return (
     <html lang="fr" translate="no" suppressHydrationWarning>
-      <body className="min-h-svh antialiased">
-        <Providers>{children}</Providers>
+      <body className="min-h-svh bg-page antialiased">
+        <Providers isAuthenticated={isAuthenticated}>
+          <SiteHeader />
+          <main>{children}</main>
+          {modal}
+        </Providers>
       </body>
     </html>
   );

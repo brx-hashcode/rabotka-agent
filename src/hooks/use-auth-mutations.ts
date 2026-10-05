@@ -1,0 +1,48 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+
+import { resendOtp, sendOtp } from "#/lib/api/agent-auth-controller";
+import { logoutSession, verifySession } from "#/lib/auth/session-client";
+import { agentMeKey } from "./use-agent-me";
+
+export function useSendOtpMutation() {
+  return useMutation({ mutationFn: (email: string) => sendOtp(email) });
+}
+
+export function useResendOtpMutation() {
+  return useMutation({ mutationFn: (email: string) => resendOtp(email) });
+}
+
+/**
+ * Exchange the code for a session (cookies set by /session/verify), then
+ * leave the sign-in route. `router.refresh()` re-runs the root layout so the
+ * header and feed switch to the signed-in view.
+ */
+export function useVerifyOtpMutation(redirectTo: string) {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: verifySession,
+    onSuccess: ({ agent }) => {
+      queryClient.removeQueries({ queryKey: ["jobs"] });
+      queryClient.setQueryData(agentMeKey, agent);
+      router.replace(redirectTo);
+      router.refresh();
+    },
+  });
+}
+
+export function useLogoutMutation() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation({
+    mutationFn: logoutSession,
+    onSettled: () => {
+      queryClient.clear();
+      router.replace("/");
+      router.refresh();
+    },
+  });
+}
