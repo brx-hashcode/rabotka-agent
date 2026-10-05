@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# rabotka-agent
 
-## Getting Started
+Field-agent platform for Rabotka. Agents sign in with email + OTP and work
+against the backend's `agent/*` API.
 
-First, run the development server:
+Next.js 16 (App Router) with the same structure and core stack as
+`rabotka-admin`: Tailwind 4 + shadcn (radix / base-ui), TanStack Query & Table,
+react-hook-form + zod, nuqs, zustand, sonner, `mvc-front-sdk` for API
+controllers.
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env   # set BACKEND_URL
+pnpm install
+pnpm dev               # http://localhost:3400
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Variable      | Purpose                                                        |
+| ------------- | -------------------------------------------------------------- |
+| `BACKEND_URL` | rabotka-backend origin, no trailing slash. Read at runtime.    |
+| `PORT`        | Port for the Docker container (dev scripts pin 3400).          |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The browser only ever calls `/api/...` on its own origin; `src/proxy.ts`
+forwards those requests to `BACKEND_URL`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Scripts
 
-## Learn More
+| Script      | Does                          |
+| ----------- | ----------------------------- |
+| `dev`       | Next dev server on :3400      |
+| `build`     | Production build (standalone) |
+| `start`     | Serve the build on :3400      |
+| `lint`      | ESLint                        |
+| `typecheck` | `tsc --noEmit`                |
+| `test`      | Vitest                        |
 
-To learn more about Next.js, take a look at the following resources:
+## Layout
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```
+src/
+  app/          routes, layout, globals.css, providers/
+  components/   shared components; ui/ holds shadcn primitives
+  config/       appConfig (apiUrl, pagination…)
+  features/     one folder per feature (auth, leads, wallet…)
+  hooks/        React Query hooks
+  lib/          utils; api/ holds one controller per backend controller
+  stores/       zustand stores
+  env.ts        validated server env
+  proxy.ts      /api/* → BACKEND_URL
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Add shadcn components with `node_modules/.bin/shadcn add <name>`.
 
-## Deploy on Vercel
+## Docker
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`Dockerfile` builds the Next standalone server. `docker-compose.prod.yml` runs
+the GHCR image behind Traefik on `AGENT_DOMAIN`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deployment
+
+Same pipeline as rabotka-admin (`.github/workflows/`):
+
+| Workflow                   | Trigger               | Does                                                              |
+| -------------------------- | --------------------- | ----------------------------------------------------------------- |
+| `deploy-develop.yml`       | PR merged → `develop` | Builds the image to GHCR, deploys `~/rabotka-agent`, smoke-tests   |
+| `deploy-production.yml`    | PR merged → `main`    | Redeploys the latest image to `~/rabotka-agent-prod`, smoke-tests  |
+| `sync-main-to-develop.yml` | push to `main`        | Fast-forwards `develop` to `main` after a release                 |
+
+Each deploy reads `BACKEND_URL` and `PORT` from Vault
+(`apps/rabotka-agent-develop` / `apps/rabotka-agent-production`) and writes
+them to the VPS `.env`. Develop is served at `agent-rabotka.<INFRA_DOMAIN>`;
+production at the `PROD_AGENT_DOMAIN` secret.

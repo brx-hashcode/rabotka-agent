@@ -1,0 +1,21 @@
+services:
+  agent:
+    image: ${AGENT_IMAGE:-ghcr.io/brx-hashcode/rabotka-agent:latest}
+    container_name: rabotka_agent_${APP_ENV:-prod}
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - public
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=hashcode-public"
+      - "traefik.http.routers.rabotka-agent-${APP_ENV:-prod}.rule=Host(`${AGENT_DOMAIN}`)"
+      - "traefik.http.routers.rabotka-agent-${APP_ENV:-prod}.entrypoints=websecure"
+      - "traefik.http.routers.rabotka-agent-${APP_ENV:-prod}.tls.certresolver=letsencrypt"
+      - "traefik.http.services.rabotka-agent-${APP_ENV:-prod}.loadbalancer.server.port=${PORT:-3400}"
+
+networks:
+  public:
+    name: hashcode-public
+    external: true
