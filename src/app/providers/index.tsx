@@ -63,11 +63,15 @@ export function Providers({ children, isAuthenticated }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider isAuthenticated={isAuthenticated}>
+        {/*
+          Light only, by design: the black header band is the contrast, and the
+          feed below stays light grey with white cards whatever the system
+          theme. The dark tokens remain in globals.css for a later toggle.
+        */}
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          forcedTheme="light"
           storageKey="theme"
-          enableSystem
           disableTransitionOnChange
         >
           <NuqsAdapter>
