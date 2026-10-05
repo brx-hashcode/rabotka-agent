@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 
 import { Providers } from "#/app/providers";
-import { SiteHeader } from "#/features/layout/components/site-header";
 import { REFRESH_COOKIE } from "#/lib/auth/cookies";
 import "./globals.css";
 
@@ -32,8 +31,7 @@ export default async function RootLayout({ children, modal }: LayoutProps<"/">) 
     <html lang="fr" translate="no" suppressHydrationWarning>
       <body className="min-h-svh bg-page antialiased">
         <Providers isAuthenticated={isAuthenticated}>
-          <SiteHeader />
-          <main>{children}</main>
+          {children}
           {modal}
         </Providers>
       </body>

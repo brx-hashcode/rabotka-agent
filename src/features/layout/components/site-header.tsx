@@ -67,14 +67,12 @@ export function SiteHeader() {
           {isAuthenticated ? (
             <AgentMenu />
           ) : (
-            !pathname.startsWith("/auth/") && (
-              <Button
-                render={<Link href={signInHref} scroll={false} />}
-                className="rounded-full px-5"
-              >
-                Se connecter
-              </Button>
-            )
+            <Button
+              render={<Link href={signInHref} scroll={false} />}
+              className="rounded-full px-5"
+            >
+              Se connecter
+            </Button>
           )}
         </div>
       </div>

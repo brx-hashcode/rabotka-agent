@@ -25,9 +25,12 @@ import { Step2OtpForm } from "./step2-otp-form";
  */
 export function SignInFlow({
   layout = "centered",
+  belowForm,
 }: Readonly<{
   /** "split": the full page's form column — left-aligned, no logo (the photo panel carries the brand). */
   layout?: "centered" | "split";
+  /** Rendered right under the form's buttons (the page's back link). */
+  belowForm?: React.ReactNode;
 }>) {
   const split = layout === "split";
   const searchParams = useSearchParams();
@@ -130,6 +133,8 @@ export function SignInFlow({
           serverError={error}
         />
       )}
+
+      {belowForm}
 
       <p className={cn("text-muted-foreground text-xs", !split && "text-center")}>
         Les comptes agents sont créés par l&apos;équipe Rabotka.

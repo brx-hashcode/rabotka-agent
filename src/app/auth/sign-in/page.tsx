@@ -16,12 +16,13 @@ const POINTS = [
  * shows. Links from inside the app are intercepted into the dialog instead
  * (src/app/@modal/(.)auth/sign-in).
  *
- * Five columns on large screens: the photo panel takes three (the hero's
- * black band, continued), the form two. Below `lg` only the form remains.
+ * Full screen, no site header (it lives in the (site) group). Five columns on
+ * large screens: the photo panel takes three, the form two. Below `lg` only
+ * the form remains, with the logo above it.
  */
 export default function SignInPage() {
   return (
-    <div className="grid min-h-[calc(100svh-4rem)] bg-card lg:grid-cols-5">
+    <div className="grid min-h-svh bg-card lg:grid-cols-5">
       <aside className="relative col-span-3 m-4 hidden overflow-hidden rounded-3xl bg-header text-header-foreground lg:flex">
         <Image
           src="/hero-workers.jpg"
@@ -32,6 +33,16 @@ export default function SignInPage() {
           className="object-cover opacity-55 grayscale"
         />
         <div className="absolute inset-0 bg-linear-to-t from-header via-header/70 to-header/10" />
+
+        <Link
+          href="/"
+          className="absolute top-8 left-10 z-10 flex items-center gap-2.5 font-semibold"
+        >
+          <Image src="/rabotka-logo.png" alt="" width={32} height={32} className="rounded-lg" />
+          <span className="text-[15px]">
+            Rabotka <span className="font-normal text-header-muted">Agent</span>
+          </span>
+        </Link>
 
         <div className="relative mt-auto flex max-w-xl flex-col gap-6 p-12">
           <IconSparkles className="size-9 text-whatsapp" />
@@ -56,17 +67,28 @@ export default function SignInPage() {
       </aside>
 
       <section className="col-span-2 flex flex-col px-6 py-10 sm:px-12">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-muted-foreground text-sm transition-colors hover:bg-page hover:text-foreground"
-        >
-          <IconArrowLeft className="size-4" />
-          Voir les offres ouvertes
+        {/* No header on this page: below lg the photo panel (and its logo) is hidden. */}
+        <Link href="/" className="flex items-center gap-2.5 font-semibold lg:hidden">
+          <Image src="/rabotka-logo.png" alt="" width={32} height={32} className="rounded-lg" />
+          <span className="text-[15px]">
+            Rabotka <span className="font-normal text-muted-foreground">Agent</span>
+          </span>
         </Link>
 
-        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col pt-8 pb-10 lg:justify-center lg:py-10">
+        <div className="mx-auto flex w-full max-w-sm flex-1 flex-col pt-10 pb-10 lg:justify-center lg:py-10">
           <Suspense>
-            <SignInFlow layout="split" />
+            <SignInFlow
+              layout="split"
+              belowForm={
+                <Link
+                  href="/"
+                  className="-mt-4 inline-flex items-center justify-center gap-1.5 rounded-full py-2 text-muted-foreground text-sm transition-colors hover:bg-page hover:text-foreground"
+                >
+                  <IconArrowLeft className="size-4" />
+                  Voir les offres ouvertes
+                </Link>
+              }
+            />
           </Suspense>
         </div>
       </section>
