@@ -5,6 +5,8 @@ import {
   getCandidates,
   inviteLead,
   logCall,
+  lookupWorker,
+  placeByPhone,
   placeLead,
   revealPhone,
 } from "#/lib/api/agent-controller";
@@ -82,5 +84,19 @@ export function usePlaceLead(jobId: string) {
   return useMutation({
     mutationFn: placeLead,
     onSuccess: (result) => write(result.lead),
+  });
+}
+
+/** Finds a worker outside the suggestions by WhatsApp number. */
+export function useLookupWorker(jobId: string) {
+  return useMutation({ mutationFn: (phone: string) => lookupWorker(jobId, phone) });
+}
+
+/** Places a worker reached outside the suggestions; they join the list as placed. */
+export function usePlaceByPhone(jobId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (phone: string) => placeByPhone(jobId, phone),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: candidatesKey(jobId) }),
   });
 }

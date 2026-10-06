@@ -158,6 +158,19 @@ export type LeadPlacement = {
   lead: AgentLead;
 };
 
+/** `POST agent/jobs/:id/worker-lookup` — a worker outside the suggestions. */
+export type WorkerLookup = {
+  worker: {
+    id: string;
+    firstName: string;
+    lastInitial: string;
+    avatarUrl: string | null;
+    city: string | null;
+  };
+  /** Why they cannot be placed on this job; null when they can. */
+  blocker: string | null;
+};
+
 /** `POST agent/leads/:id/invite` — the placement invitation. */
 export type LeadInvite = {
   inviteUrl: string;

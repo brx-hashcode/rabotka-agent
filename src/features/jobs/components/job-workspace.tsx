@@ -132,7 +132,7 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
           </div>
         </div>
         <div className={cn(tab !== "candidats" && "max-lg:hidden")}>
-          <CandidatesList jobId={id} />
+          <CandidatesList jobId={id} countryCode={detail.data.job.countryCode} />
         </div>
       </div>
     </div>

@@ -10,6 +10,7 @@ import type {
   LeadPlacement,
   JobsQuery,
   PhoneReveal,
+  WorkerLookup,
 } from "./types";
 
 /** `agent/*` — the signed-in agent's own data, limited to their zones. */
@@ -56,6 +57,16 @@ class AgentController extends AgentBaseController {
     return this.post(`/agent/leads/${encodeURIComponent(leadId)}/place`);
   }
 
+  /** Find a worker outside the suggestions by their WhatsApp number (logged, capped). */
+  lookupWorker(jobId: string, phone: string): Promise<WorkerLookup> {
+    return this.post(`/agent/jobs/${encodeURIComponent(jobId)}/worker-lookup`, { phone });
+  }
+
+  /** Place a worker reached outside the suggestions, who agreed on the phone. */
+  placeByPhone(jobId: string, phone: string): Promise<LeadPlacement> {
+    return this.post(`/agent/jobs/${encodeURIComponent(jobId)}/place-by-phone`, { phone });
+  }
+
   /** Issue (or re-issue) the invitation that places the worker on the job. */
   inviteLead(leadId: string): Promise<LeadInvite> {
     return this.post(`/agent/leads/${encodeURIComponent(leadId)}/invite`);
@@ -80,3 +91,5 @@ export const revealPhone = controller.revealPhone.bind(controller);
 export const logCall = controller.logCall.bind(controller);
 export const inviteLead = controller.inviteLead.bind(controller);
 export const placeLead = controller.placeLead.bind(controller);
+export const lookupWorker = controller.lookupWorker.bind(controller);
+export const placeByPhone = controller.placeByPhone.bind(controller);

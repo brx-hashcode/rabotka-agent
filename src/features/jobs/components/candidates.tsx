@@ -49,6 +49,7 @@ import type {
 } from "#/lib/api/types";
 import { cn, getInitials } from "#/lib/utils";
 import { ActionDialog } from "./action-dialog";
+import { OffListPlacement } from "./off-list-placement";
 
 const OUTCOMES: {
   value: CallOutcome;
@@ -95,7 +96,10 @@ const OUTCOME_LABEL = Object.fromEntries(OUTCOMES.map((o) => [o.value, o.label])
  * (claimer only, logged, capped per day), call or message them, record the
  * call. No contact detail is shown before the reveal.
  */
-export function CandidatesList({ jobId }: Readonly<{ jobId: string }>) {
+export function CandidatesList({
+  jobId,
+  countryCode,
+}: Readonly<{ jobId: string; countryCode: string | null }>) {
   const candidates = useCandidates(jobId, true);
 
   return (
@@ -114,6 +118,8 @@ export function CandidatesList({ jobId }: Readonly<{ jobId: string }>) {
           son numéro et l&apos;appeler.
         </p>
       </div>
+
+      <OffListPlacement jobId={jobId} countryCode={countryCode} />
 
       {candidates.isPending &&
         Array.from({ length: 3 }, (_, i) => (
