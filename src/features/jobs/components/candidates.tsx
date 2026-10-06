@@ -17,6 +17,7 @@ import {
   IconSend,
   IconCopy,
   IconCircleCheck,
+  IconExternalLink,
   IconRosetteDiscountCheckFilled,
   IconLock,
   IconPhone,
@@ -397,9 +398,7 @@ function MyLead({
           hideCancel
           onConfirm={() => setSent(null)}
         >
-          <p className="whitespace-pre-line rounded-2xl bg-page px-4 py-3 text-sm leading-relaxed">
-            {sent.message}
-          </p>
+          <WhatsAppPreview invite={sent} />
           <p className="text-muted-foreground text-xs">
             Le lien expire le {format(new Date(sent.expiresAt), "d MMM 'à' HH'h'mm", { locale: fr })}.
           </p>
@@ -564,6 +563,54 @@ function Placement({
     <p className="px-1 text-muted-foreground text-xs">
       Après un appel concluant (« Intéressé »), vous pourrez placer {workerName} sur l&apos;offre.
     </p>
+  );
+}
+
+/**
+ * The invitation as the worker sees it on WhatsApp: the message bubble, and
+ * the link as the button under it — never pasted into the text.
+ */
+function WhatsAppPreview({ invite }: Readonly<{ invite: LeadInvite }>) {
+  const preview = invite.preview ?? {
+    // Older backend: no preview — drop the trailing link from the plain text.
+    body: invite.message.replace(invite.inviteUrl, "").replace(/[\s:]+$/, "."),
+    buttonText: "Voir l'offre",
+    url: invite.inviteUrl,
+  };
+
+  return (
+    <div className="rounded-2xl bg-page p-3">
+      <div className="overflow-hidden rounded-2xl rounded-tl-md bg-card">
+        <div className="px-4 pt-3 pb-2 text-sm leading-relaxed">
+          {preview.body.split("\n").map((line, i) => (
+            <p key={i} className={cn(line === "" && "h-3")}>
+              {line.split(/(\*[^*]+\*)/g).map((part, j) =>
+                part.startsWith("*") && part.endsWith("*") && part.length > 2 ? (
+                  <strong key={j} className="font-semibold">
+                    {part.slice(1, -1)}
+                  </strong>
+                ) : (
+                  part
+                ),
+              )}
+            </p>
+          ))}
+          <p className="mt-1 text-right text-[11px] text-muted-foreground">
+            {format(new Date(), "HH:mm")}
+          </p>
+        </div>
+        <div aria-hidden className="h-px bg-border/70" />
+        <a
+          href={preview.url}
+          target="_blank"
+          rel="noreferrer"
+          className="flex items-center justify-center gap-2 py-2.5 font-medium text-sm text-whatsapp-dark transition-colors hover:bg-page"
+        >
+          <IconExternalLink className="size-4" />
+          {preview.buttonText}
+        </a>
+      </div>
+    </div>
   );
 }
 

@@ -154,8 +154,10 @@ export type PhoneReveal = {
 export type LeadInvite = {
   inviteUrl: string;
   expiresAt: string;
-  /** Ready-to-send text, with the link. */
+  /** Plain text with the link inline — for copying into any chat. */
   message: string;
+  /** The WhatsApp message as the worker receives it; the link is the button. */
+  preview?: { body: string; buttonText: string; url: string };
   /** True when Rabotka itself sent the invitation to the worker by WhatsApp. */
   sentToWorker: boolean;
   /** Pre-filled wa.me link; only once this agent revealed the worker's number. */
