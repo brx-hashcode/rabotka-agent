@@ -1,5 +1,10 @@
+"use client";
+
 import Link from "next/link";
-import { IconClock, IconLock } from "@tabler/icons-react";
+import { IconClock, IconLock, IconMapPin, IconMapPinOff } from "@tabler/icons-react";
+
+import { useSession } from "#/app/providers/session-context";
+import { useAgentMe } from "#/hooks/use-agent-me";
 
 import { isAgentJob, type FeedJob } from "#/hooks/use-jobs-feed";
 import type { JobCategoryOption } from "#/lib/api/types";
@@ -15,7 +20,8 @@ import { cn, formatXAF } from "#/lib/utils";
 
 /**
  * One job, as the mockup's card. No employer anywhere — the category emoji
- * takes the logo slot. Signed-in agents also see the description and pay.
+ * takes the logo slot. Every card shows the start of the description;
+ * jobs in a signed-in agent's zones also show the pay.
  * A soft link to /jobs/[id], which the `@modal` slot opens as a side panel.
  */
 export function JobCard({
@@ -28,6 +34,7 @@ export function JobCard({
   const href = `/jobs/${job.id}`;
   const start = jobStartShort(job.scheduledAt);
   const agentJob = isAgentJob(job) ? job : null;
+  const summary = agentJob?.description ?? job.excerpt ?? null;
 
   return (
     <Link
@@ -64,10 +71,8 @@ export function JobCard({
         {start && <Chip tone="amber">{start}</Chip>}
       </div>
 
-      {agentJob?.description && (
-        <p className="mt-3 line-clamp-2 text-muted-foreground text-sm">
-          {agentJob.description}
-        </p>
+      {summary && (
+        <p className="mt-3 line-clamp-2 text-muted-foreground text-sm">{summary}</p>
       )}
 
       <div className="mt-auto pt-4">
@@ -90,10 +95,7 @@ export function JobCard({
               )}
             </p>
           ) : (
-            <p className="flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
-              <IconLock className="size-3.5 shrink-0" />
-              <span className="truncate">Réservé aux agents</span>
-            </p>
+            <PublicJobNote job={job} />
           )}
           <span className="flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
             <IconClock className="size-3.5" />
@@ -102,6 +104,39 @@ export function JobCard({
         </div>
       </div>
     </Link>
+  );
+}
+
+/**
+ * Where the pay of a public card is. Visitors: agents only. A signed-in agent
+ * browsing every job: whether it lies in their zones — opening one that does
+ * shows the pay; the others stay summary-only.
+ */
+function PublicJobNote({ job }: Readonly<{ job: FeedJob }>) {
+  const { isAuthenticated } = useSession();
+  const { data: agent } = useAgentMe();
+
+  let icon = IconLock;
+  let label = "Réservé aux agents";
+  if (isAuthenticated && agent) {
+    const city = job.city?.trim().toLowerCase();
+    const inZones =
+      !!city &&
+      agent.zones.some(
+        (z) =>
+          z.city.trim().toLowerCase() === city &&
+          (!job.countryCode || z.countryCode === job.countryCode),
+      );
+    icon = inZones ? IconMapPin : IconMapPinOff;
+    label = inZones ? "Dans vos zones" : "Hors de vos zones";
+  }
+  const Icon = icon;
+
+  return (
+    <p className="flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
+      <Icon className="size-3.5 shrink-0" />
+      <span className="truncate">{label}</span>
+    </p>
   );
 }
 

@@ -40,6 +40,8 @@ export type PublicJob = {
   seatsLeft: number;
   createdAt: string;
   category: JobCategory | null;
+  /** The description's start, for the card (public list only). */
+  excerpt?: string | null;
 };
 
 /** `GET agent/jobs` — the full shape, for jobs in the agent's zones (toAgentJob). */
