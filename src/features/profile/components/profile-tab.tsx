@@ -2,6 +2,7 @@
 
 import {
   IconInfoCircle,
+  IconLogout,
   IconMail,
   IconMapPin,
   IconPhone,
@@ -9,7 +10,9 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 
+import { Button } from "#/components/ui/button";
 import { useAgentMe } from "#/hooks/use-agent-me";
+import { useLogoutMutation } from "#/hooks/use-auth-mutations";
 import { cn } from "#/lib/utils";
 
 const STATUS: Record<string, { label: string; tone: string }> = {
@@ -21,10 +24,11 @@ const STATUS: Record<string, { label: string; tone: string }> = {
 /**
  * The agent's account as Rabotka holds it. Read-only: agents are created and
  * edited by an admin (photo, identity, zones), so changes go through them.
- * Sign-out lives in the header menu.
+ * Sign-out is here as well as in the header menu.
  */
 export function ProfileTab() {
   const me = useAgentMe();
+  const logout = useLogoutMutation();
 
   if (!me.data) {
     return (
@@ -93,6 +97,25 @@ export function ProfileTab() {
             Contactez-la pour les modifier.
           </p>
         </div>
+      </section>
+
+      <section className="flex flex-col gap-3 rounded-3xl bg-card p-5 sm:flex-row sm:items-center sm:p-6 lg:col-span-2">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-page text-muted-foreground">
+          <IconLogout className="size-5" />
+        </span>
+        <div className="min-w-0 flex-1 space-y-1">
+          <p className="font-semibold">Session</p>
+          <p className="truncate text-muted-foreground text-sm">Connecté(e) en tant que {agent.email}</p>
+        </div>
+        <Button
+          variant="secondary"
+          className="rounded-full"
+          onClick={() => logout.mutate()}
+          disabled={logout.isPending}
+        >
+          <IconLogout />
+          Se déconnecter
+        </Button>
       </section>
     </div>
   );
