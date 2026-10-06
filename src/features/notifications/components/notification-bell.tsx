@@ -2,21 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  IconBell,
-  IconBellRinging,
-  IconBriefcase,
-  IconCash,
-  IconCashOff,
-  IconCircleCheck,
-  IconCircleX,
-  IconMapPin,
-  IconPlayerPlay,
-  IconShieldOff,
-  IconUserCheck,
-  IconWallet,
-  type Icon,
-} from "@tabler/icons-react";
+import { IconBell, IconBellRinging } from "@tabler/icons-react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "#/components/ui/popover";
 import {
@@ -25,25 +11,11 @@ import {
   useNotifications,
 } from "#/hooks/use-notifications";
 import { usePush } from "#/hooks/use-push";
-import type { AgentNotification, AgentNotificationType } from "#/lib/api/types";
+import type { AgentNotification } from "#/lib/api/types";
+import { notificationLook } from "../notification-look";
 import { postedAgo } from "#/lib/job-labels";
 import { cn } from "#/lib/utils";
 
-const LOOK: Record<AgentNotificationType, { icon: Icon; tone: string }> = {
-  COMMISSION_EARNED: { icon: IconCash, tone: "bg-chip-green text-chip-green-foreground" },
-  COMMISSION_AVAILABLE: { icon: IconWallet, tone: "bg-chip-green text-chip-green-foreground" },
-  COMMISSION_CANCELLED: { icon: IconCashOff, tone: "bg-destructive/10 text-destructive" },
-  WITHDRAWAL_PAID: { icon: IconCircleCheck, tone: "bg-chip-green text-chip-green-foreground" },
-  WITHDRAWAL_REJECTED: { icon: IconCircleX, tone: "bg-destructive/10 text-destructive" },
-  PLACEMENT_ACCEPTED: { icon: IconUserCheck, tone: "bg-chip-violet text-chip-violet-foreground" },
-  PLACEMENT_STARTED: { icon: IconPlayerPlay, tone: "bg-chip-violet text-chip-violet-foreground" },
-  PLACEMENT_COMPLETED: { icon: IconCircleCheck, tone: "bg-chip-violet text-chip-violet-foreground" },
-  PLACEMENT_ENDED: { icon: IconCircleX, tone: "bg-chip-amber text-chip-amber-foreground" },
-  NEW_JOBS_IN_ZONE: { icon: IconBriefcase, tone: "bg-chip-amber text-chip-amber-foreground" },
-  ZONES_CHANGED: { icon: IconMapPin, tone: "bg-chip-green text-chip-green-foreground" },
-  ACCOUNT_SUSPENDED: { icon: IconShieldOff, tone: "bg-destructive/10 text-destructive" },
-  ACCOUNT_REACTIVATED: { icon: IconCircleCheck, tone: "bg-chip-green text-chip-green-foreground" },
-};
 
 /** The header's bell: unread count, the latest notifications, and push for this device. */
 export function NotificationBell() {
@@ -138,7 +110,7 @@ function Item({
   n,
   onOpen,
 }: Readonly<{ n: AgentNotification; onOpen: (n: AgentNotification) => void }>) {
-  const { icon: Icon, tone } = LOOK[n.type] ?? LOOK.ZONES_CHANGED;
+  const { icon: Icon, tone } = notificationLook(n.type);
   return (
     <button
       type="button"

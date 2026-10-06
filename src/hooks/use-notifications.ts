@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { createElement, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   useInfiniteQuery,
@@ -20,6 +20,7 @@ import type {
   AgentNotificationType,
 } from "#/lib/api/types";
 import { refreshSession } from "#/lib/auth/session-client";
+import { notificationLook } from "#/features/notifications/notification-look";
 import { createSseParser } from "#/lib/sse";
 import { accountKey } from "./use-account";
 import { agentMeKey } from "./use-agent-me";
@@ -160,9 +161,14 @@ export function useNotificationStream(enabled: boolean) {
       for (const key of STALE[n.type] ?? []) {
         void queryClient.invalidateQueries({ queryKey: key });
       }
+      const look = notificationLook(n.type);
       toast(n.title, {
         description: n.body,
-        classNames: { description: "!text-muted-foreground" },
+        icon: createElement(
+          "span",
+          { className: `flex size-10 items-center justify-center rounded-xl ${look.tone}` },
+          createElement(look.icon, { className: "size-5" }),
+        ),
         action: n.link
           ? { label: "Voir", onClick: () => routerRef.current.push(n.link as string) }
           : undefined,
