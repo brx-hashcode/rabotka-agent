@@ -1,5 +1,23 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
+
+/* Gilroy, the display face of rabotka-client's logo lockup (free cut: 300
+   and 800 only — font-bold resolves to ExtraBold, as in the client). */
+@font-face {
+  font-family: "Gilroy";
+  src: url("/fonts/Gilroy-Light.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gilroy";
+  src: url("/fonts/Gilroy-ExtraBold.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
@@ -8,6 +26,7 @@
 
 @theme {
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Gilroy", ui-sans-serif, sans-serif;
 }
 
 :root {
