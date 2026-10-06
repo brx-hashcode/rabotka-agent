@@ -292,14 +292,70 @@ function MyLead({
     : null;
   const phone = revealed?.phone ?? revealed?.directPhone ?? null;
 
+  const agreed = lead.lastCall?.outcome === "INTERESTED";
+  const invited = lead.status === "INVITED";
+  const inviteUntil = lead.inviteExpiresAt ? new Date(lead.inviteExpiresAt) : null;
+  const openCall = () => {
+    setOutcome(null);
+    setNote("");
+    setDialog("call");
+  };
+
+  let status: string;
+  if (invited && lead.inviteLapsed) status = "Invitation expirée";
+  else if (invited) {
+    status = inviteUntil
+      ? `Invitation envoyée · expire le ${format(inviteUntil, "d MMM 'à' HH'h'mm", { locale: fr })}`
+      : "Invitation envoyée";
+  } else {
+    status = untilLabel ? `Pris en charge · jusqu'à ${untilLabel}` : "Pris en charge par vous";
+  }
+
+  // One main button: the next step. The rest stay reachable, smaller.
+  /** `more` completes the label from `sm` up; phones show the short form. */
+  type Action = { label: string; more?: string; icon: typeof IconPhone; onClick: () => void };
+  let step: "place" | "call" | "reveal";
+  if (agreed) step = "place";
+  else if (revealed) step = "call";
+  else step = "reveal";
+  let primary: Action;
+  if (step === "place") {
+    primary = { label: `Placer ${workerName} sur l'offre`, icon: IconUserPlus, onClick: () => setDialog("place") };
+  } else if (step === "call") {
+    primary = { label: "Résultat de l'appel", icon: IconClipboardCheck, onClick: openCall };
+  } else {
+    primary = { label: `Voir le numéro de ${workerName}`, icon: IconPhone, onClick: () => setDialog("reveal") };
+  }
+  const secondary = [
+    !revealed && step !== "reveal" && {
+      label: "Voir le numéro",
+      icon: IconPhone,
+      onClick: () => setDialog("reveal"),
+    },
+    step !== "call" && {
+      label: "Résultat de l'appel",
+      icon: IconClipboardCheck,
+      onClick: openCall,
+    },
+    agreed && {
+      label: invited ? "Renvoyer" : "Inviter",
+      more: invited ? " l'invitation" : " par lien",
+      icon: IconSend,
+      onClick: () => setDialog("invite"),
+    },
+  ].filter((a): a is Action => !!a);
+
   return (
     <div className="flex flex-col gap-3 rounded-2xl bg-page p-3">
-      <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-xs">
-        <span className="font-medium text-chip-green-foreground">
-          {lead.status === "INVITED" ? "Invitation envoyée" : "Pris en charge par vous"}
-          {untilLabel && lead.status === "CLAIMED" && (
-            <span className="font-normal text-muted-foreground"> · jusqu&apos;à {untilLabel}</span>
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-1 text-xs">
+        <span
+          className={cn(
+            "inline-flex items-center gap-1.5 font-medium",
+            invited && lead.inviteLapsed ? "text-muted-foreground" : "text-chip-green-foreground",
           )}
+        >
+          {invited && <IconSend className="size-3.5" />}
+          {status}
         </span>
         {lead.lastCall && (
           <span className="text-muted-foreground">
@@ -308,46 +364,68 @@ function MyLead({
         )}
       </div>
 
-      {revealed ? (
-        <div className="flex flex-col gap-3 rounded-xl bg-card p-3">
-          <div className="space-y-0.5">
-            <p className="whitespace-nowrap font-semibold text-xl tabular-nums tracking-wide">
+      {revealed && (
+        <div className="flex items-center gap-2 rounded-xl bg-card p-2 pl-4">
+          <div className="mr-auto min-w-0">
+            <p className="whitespace-nowrap font-semibold tabular-nums tracking-wide">
               {phone ?? "Numéro non renseigné"}
             </p>
-            <p className="text-muted-foreground text-xs">
-              {revealed.revealsLeftToday > 0
-                ? `Encore ${revealed.revealsLeftToday} numéro${revealed.revealsLeftToday > 1 ? "s" : ""} à consulter aujourd'hui`
-                : "C'était votre dernier numéro pour aujourd'hui"}
-            </p>
+            {revealed.directPhone && revealed.directPhone !== phone && (
+              <p className="text-muted-foreground text-xs">Autre : {revealed.directPhone}</p>
+            )}
           </div>
-          {revealed.directPhone && revealed.directPhone !== phone && (
-            <p className="text-muted-foreground text-xs">Autre numéro : {revealed.directPhone}</p>
-          )}
           {phone && (
-            <div className="grid grid-cols-2 gap-2">
-              <Button size="lg" className="rounded-full" render={<a href={`tel:${phone}`} />}>
+            <>
+              {/* Icons only on phones, so the number keeps its line. */}
+              <Button
+                size="sm"
+                variant="secondary"
+                className="shrink-0 rounded-full max-sm:size-9 max-sm:px-0"
+                aria-label="Appeler"
+                render={<a href={`tel:${phone}`} />}
+              >
                 <IconPhoneCall />
-                Appeler
+                <span className="max-sm:hidden">Appeler</span>
               </Button>
               <Button
-                size="lg"
+                size="sm"
                 variant="secondary"
-                className="rounded-full"
+                className="shrink-0 rounded-full max-sm:size-9 max-sm:px-0"
+                aria-label="WhatsApp"
                 render={
                   <a href={`https://wa.me/${phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" />
                 }
               >
                 <IconBrandWhatsapp />
-                WhatsApp
+                <span className="max-sm:hidden">WhatsApp</span>
               </Button>
-            </div>
+            </>
           )}
         </div>
-      ) : (
-        <Button size="lg" className="w-full rounded-full" onClick={() => setDialog("reveal")}>
-          <IconPhone />
-          Voir le numéro de {workerName}
-        </Button>
+      )}
+
+      <Button size="lg" className="w-full rounded-full" onClick={primary.onClick}>
+        <primary.icon />
+        {primary.label}
+      </Button>
+
+      {secondary.length > 0 && (
+        <div className="grid auto-cols-fr grid-flow-col gap-1 sm:flex sm:justify-center">
+          {secondary.map((a) => (
+            <button
+              key={a.label}
+              type="button"
+              onClick={a.onClick}
+              className="inline-flex min-w-0 items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-card hover:text-foreground"
+            >
+              <a.icon className="size-3.5 shrink-0" />
+              <span className="truncate">
+                {a.label}
+                {a.more && <span className="max-sm:hidden">{a.more}</span>}
+              </span>
+            </button>
+          ))}
+        </div>
       )}
 
       <ActionDialog
@@ -372,12 +450,6 @@ function MyLead({
         }
       />
 
-      <Placement
-        lead={lead}
-        workerName={workerName}
-        onPlace={() => setDialog("place")}
-        onInvite={() => setDialog("invite")}
-      />
 
       <ActionDialog
         open={dialog === "place"}
@@ -479,20 +551,6 @@ function MyLead({
         </ActionDialog>
       )}
 
-      <Button
-        size="lg"
-        variant="ghost"
-        className="w-full rounded-full bg-card"
-        onClick={() => {
-          setOutcome(null);
-          setNote("");
-          setDialog("call");
-        }}
-      >
-        <IconClipboardCheck />
-        Résultat de l&apos;appel
-      </Button>
-
       <ActionDialog
         open={dialog === "call"}
         onOpenChange={(open) => setDialog(open ? "call" : null)}
@@ -563,76 +621,6 @@ function MyLead({
         />
       </ActionDialog>
     </div>
-  );
-}
-
-/**
- * Placing = sending the invitation. Offered once the last call ended with
- * "Intéressé"; once sent, shows its state and lets the agent send it again.
- */
-function Placement({
-  lead,
-  workerName,
-  onPlace,
-  onInvite,
-}: Readonly<{
-  lead: AgentLead;
-  workerName: string;
-  onPlace: () => void;
-  onInvite: () => void;
-}>) {
-  const agreed = lead.lastCall?.outcome === "INTERESTED";
-
-  const placeButton = agreed && (
-    <Button size="lg" className="w-full rounded-full" onClick={onPlace}>
-      <IconUserPlus />
-      Placer {workerName} sur l&apos;offre
-    </Button>
-  );
-
-  if (lead.status === "INVITED") {
-    const expires = lead.inviteExpiresAt ? new Date(lead.inviteExpiresAt) : null;
-    return (
-      <div className="flex flex-col gap-2 rounded-xl bg-card p-3">
-        <p className="flex items-center gap-2 font-medium text-sm">
-          <IconSend
-            className={cn("size-4", lead.inviteLapsed ? "text-muted-foreground" : "text-whatsapp-dark")}
-          />
-          {lead.inviteLapsed ? "Invitation expirée" : `Invitation envoyée à ${workerName}`}
-        </p>
-        <p className="text-muted-foreground text-xs">
-          {lead.inviteLapsed || !expires
-            ? `${workerName} n'a pas répondu à temps. Renvoyez-lui un nouveau lien.`
-            : `En attente de sa réponse · le lien expire le ${format(expires, "d MMM 'à' HH'h'mm", { locale: fr })}.`}
-        </p>
-        {placeButton}
-        <Button size="lg" variant="secondary" className="rounded-full" onClick={onInvite}>
-          <IconSend />
-          Renvoyer l&apos;invitation
-        </Button>
-      </div>
-    );
-  }
-
-  if (agreed) {
-    return (
-      <div className="flex flex-col gap-1">
-        {placeButton}
-        <button
-          type="button"
-          onClick={onInvite}
-          className="self-center rounded-full px-3 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-card hover:text-foreground"
-        >
-          Ou envoyer une invitation à {workerName}
-        </button>
-      </div>
-    );
-  }
-
-  return (
-    <p className="px-1 text-muted-foreground text-xs">
-      Après un appel concluant (« Intéressé »), vous pourrez placer {workerName} sur l&apos;offre.
-    </p>
   );
 }
 
