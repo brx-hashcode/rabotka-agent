@@ -105,7 +105,15 @@ export async function disablePush(): Promise<void> {
  * subscription exists, matches the backend's current key and belongs to this
  * agent (another agent may have signed in on this browser before).
  */
-export async function syncPush(): Promise<void> {
-  if (!supported() || Notification.permission !== "granted") return;
-  await subscribe();
+let synced: Promise<void> | null = null;
+
+export function syncPush(): Promise<void> {
+  if (!supported() || Notification.permission !== "granted") return Promise.resolve();
+  // Once per page load: React's dev double effects (and remounts) must not
+  // re-register the device each time.
+  synced ??= subscribe().catch((err: unknown) => {
+    synced = null;
+    throw err;
+  });
+  return synced;
 }
