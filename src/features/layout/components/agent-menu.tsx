@@ -32,7 +32,7 @@ export function AgentMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="group flex items-center gap-2.5 rounded-full py-1 pr-2 pl-1 outline-none transition-colors hover:bg-white/10 focus-visible:ring-2 focus-visible:ring-whatsapp/50 sm:pl-3"
+        className="group flex items-center gap-2.5 rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-whatsapp/60 focus-visible:ring-offset-2 focus-visible:ring-offset-header sm:py-1 sm:pr-2 sm:pl-3 sm:hover:bg-white/10"
         aria-label="Mon compte"
       >
         {agent && (
@@ -48,6 +48,9 @@ export function AgentMenu() {
       <DropdownMenuContent
         align="end"
         sideOffset={10}
+        // Closing by tap must not hand focus back to the trigger: on phones
+        // that left a focus ring around the avatar.
+        onCloseAutoFocus={(e) => e.preventDefault()}
         className="w-80 rounded-3xl border-0 bg-card p-2 shadow-soft"
       >
         <div className="flex items-center gap-3 rounded-2xl bg-page p-3">
