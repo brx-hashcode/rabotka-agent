@@ -23,12 +23,7 @@ export function PlacementItem({ placement: p }: Readonly<{ placement: JobPlaceme
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium">{name}</p>
           <p className="truncate text-muted-foreground text-xs">
-            {/* A plain link on purpose: next/link would be intercepted into
-                the side sheet (@modal), drawn over this page. The account
-                page wants the job's own page. */}
-            <a href={`/jobs/${p.job.id}`} className="hover:text-foreground hover:underline">
-              {p.job.title}
-            </a>
+            {p.job.title}
             {" · "}
             {format(new Date(p.placedAt), "d MMM yyyy", { locale: fr })}
           </p>
