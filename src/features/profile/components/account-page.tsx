@@ -1,13 +1,12 @@
 "use client";
 
-import { IconMapPin, IconWallet } from "@tabler/icons-react";
+import { IconMapPin } from "@tabler/icons-react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { useAgentMe } from "#/hooks/use-agent-me";
-import { useWallet } from "#/hooks/use-account";
 import { friendlyError } from "#/lib/api/friendly-error";
-import { cn, formatXAF, getInitials } from "#/lib/utils";
+import { cn, getInitials } from "#/lib/utils";
 import { OverviewTab } from "./overview-tab";
 import { PlacementsTab } from "./placements-tab";
 import { ProfileTab } from "./profile-tab";
@@ -30,7 +29,6 @@ const TAB_LABELS: Record<AccountTab, string> = {
  */
 export function AccountPage() {
   const me = useAgentMe();
-  const { wallet } = useWallet();
   const [tab, setTab] = useQueryState(
     "tab",
     parseAsStringLiteral(ACCOUNT_TABS).withDefault("apercu"),
@@ -79,26 +77,6 @@ export function AccountPage() {
             </div>
           </div>
         </div>
-
-        <button
-          type="button"
-          onClick={() => void setTab("portefeuille")}
-          className={cn(
-            "flex items-center gap-3 rounded-2xl bg-card px-4 py-3 text-left transition-colors hover:bg-card/80",
-            // The wallet tab shows the balance in full already.
-            tab === "portefeuille" && "max-sm:hidden",
-          )}
-        >
-          <span className="flex size-10 items-center justify-center rounded-xl bg-header text-header-foreground">
-            <IconWallet className="size-5" />
-          </span>
-          <span className="leading-tight">
-            <span className="block text-muted-foreground text-xs">Disponible</span>
-            <span className="block font-semibold text-lg tabular-nums">
-              {wallet ? formatXAF(wallet.balance.available) : "—"}
-            </span>
-          </span>
-        </button>
       </header>
 
       <nav
