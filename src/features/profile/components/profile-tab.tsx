@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   IconInfoCircle,
   IconLogout,
@@ -11,8 +12,8 @@ import {
 } from "@tabler/icons-react";
 
 import { Button } from "#/components/ui/button";
+import { LogoutDialog } from "#/features/layout/components/logout-dialog";
 import { useAgentMe } from "#/hooks/use-agent-me";
-import { useLogoutMutation } from "#/hooks/use-auth-mutations";
 import { cn } from "#/lib/utils";
 
 const STATUS: Record<string, { label: string; tone: string }> = {
@@ -28,7 +29,7 @@ const STATUS: Record<string, { label: string; tone: string }> = {
  */
 export function ProfileTab() {
   const me = useAgentMe();
-  const logout = useLogoutMutation();
+  const [confirmLogout, setConfirmLogout] = useState(false);
 
   if (!me.data) {
     return (
@@ -110,12 +111,12 @@ export function ProfileTab() {
         <Button
           variant="secondary"
           className="rounded-full"
-          onClick={() => logout.mutate()}
-          disabled={logout.isPending}
+          onClick={() => setConfirmLogout(true)}
         >
           <IconLogout />
           Se déconnecter
         </Button>
+        <LogoutDialog open={confirmLogout} onOpenChange={setConfirmLogout} />
       </section>
     </div>
   );
