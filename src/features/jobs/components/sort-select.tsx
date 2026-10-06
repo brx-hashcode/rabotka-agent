@@ -19,7 +19,7 @@ export function SortSelect() {
       >
         <SelectValue>{LABELS[sort]}</SelectValue>
       </SelectTrigger>
-      <SelectContent align="end">
+      <SelectContent align="end" position="popper" sideOffset={6} className="min-w-52">
         <SelectItem value="recent">{LABELS.recent}</SelectItem>
         <SelectItem value="start">{LABELS.start}</SelectItem>
       </SelectContent>
