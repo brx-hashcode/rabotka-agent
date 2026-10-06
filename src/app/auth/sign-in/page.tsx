@@ -24,33 +24,39 @@ const POINTS = [
 export default function SignInPage() {
   return (
     <div className="grid min-h-svh bg-card lg:grid-cols-5">
-      <aside className="relative col-span-3 m-4 hidden overflow-hidden rounded-3xl bg-header text-header-foreground lg:flex">
+      <aside className="relative col-span-3 m-4 hidden overflow-hidden rounded-3xl bg-ink text-white lg:flex">
+        {/* Unsplash photo-1688241320695-6ca991df8818, shown in full colour. */}
         <Image
-          src="/hero-workers.jpg"
+          src="/sign-in-craftsman.jpg"
           alt=""
           fill
           sizes="60vw"
           priority
-          className="object-cover opacity-55 grayscale"
+          className="object-cover object-[50%_30%]"
         />
-        <div className="absolute inset-0 bg-linear-to-t from-header via-header/70 to-header/10" />
+        {/* Darkens the lower part only, for the text; the photo stays clear above. */}
+        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-black/90 via-black/65 to-transparent" />
 
-        <Link href="/" aria-label="Rabotka — accueil" className="absolute top-8 left-10 z-10">
-          <BrandLogo tone="dark" />
+        <Link
+          href="/"
+          aria-label="Rabotka — accueil"
+          className="absolute top-6 left-6 z-10 rounded-full bg-card/95 py-1.5 pr-4 pl-2 text-foreground"
+        >
+          <BrandLogo />
         </Link>
 
         <div className="relative mt-auto flex max-w-xl flex-col gap-6 p-12">
           <h1 className="font-semibold text-4xl leading-tight tracking-tight">
             L&apos;espace des agents Rabotka
           </h1>
-          <p className="text-header-muted">
+          <p className="text-white/80">
             Vous connectez les travailleurs de votre ville aux offres qui les
             attendent. Tout ce qu&apos;il vous faut pour le faire est ici.
           </p>
           <ul className="flex flex-col gap-3">
             {POINTS.map((point) => (
               <li key={point} className="flex items-center gap-3 text-sm">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-ink/10 text-ink">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-whatsapp text-white">
                   <IconCheck className="size-3.5" strokeWidth={3} />
                 </span>
                 {point}
