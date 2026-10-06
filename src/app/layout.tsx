@@ -28,14 +28,19 @@ export default async function RootLayout({ children, modal }: LayoutProps<"/">) 
   const isAuthenticated = (await cookies()).has(REFRESH_COOKIE);
 
   return (
-    <html lang="fr" translate="no" suppressHydrationWarning>
+    // The document background is the header's lime: Safari (iOS 26+) tints
+    // its status bar with it, ignoring theme-color, and the top overscroll
+    // shows it too. The grey page colour lives on the wrapper below.
+    <html lang="fr" translate="no" className="bg-header" suppressHydrationWarning>
       {/* Extensions such as Grammarly add attributes to <body> before React
           hydrates; only this element's own attributes are exempt. */}
-      <body className="min-h-svh bg-page antialiased" suppressHydrationWarning>
-        <Providers isAuthenticated={isAuthenticated}>
-          {children}
-          {modal}
-        </Providers>
+      <body className="min-h-svh bg-header antialiased" suppressHydrationWarning>
+        <div className="min-h-svh bg-page">
+          <Providers isAuthenticated={isAuthenticated}>
+            {children}
+            {modal}
+          </Providers>
+        </div>
       </body>
     </html>
   );
