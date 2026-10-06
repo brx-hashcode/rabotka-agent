@@ -323,3 +323,40 @@ export type WithdrawalRequest = {
   momoOperator: MomoOperator;
   momoPhone?: string;
 };
+
+export type AgentNotificationType =
+  | "COMMISSION_EARNED"
+  | "COMMISSION_AVAILABLE"
+  | "COMMISSION_CANCELLED"
+  | "WITHDRAWAL_PAID"
+  | "WITHDRAWAL_REJECTED"
+  | "PLACEMENT_ACCEPTED"
+  | "PLACEMENT_STARTED"
+  | "PLACEMENT_COMPLETED"
+  | "PLACEMENT_ENDED"
+  | "NEW_JOBS_IN_ZONE"
+  | "ZONES_CHANGED"
+  | "ACCOUNT_SUSPENDED"
+  | "ACCOUNT_REACTIVATED";
+
+/** One entry of the bell. The copy is already rendered, in French. */
+export type AgentNotification = {
+  id: string;
+  type: AgentNotificationType;
+  title: string;
+  body: string;
+  /** In-app path to open, or null. */
+  link: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  readAt: string | null;
+};
+
+/** `GET agent/notifications` */
+export type AgentNotificationsPage = Paginated<AgentNotification> & { unread: number };
+
+/** The browser's PushSubscription.toJSON(). */
+export type PushSubscriptionBody = {
+  endpoint: string;
+  keys: { p256dh: string; auth: string };
+};

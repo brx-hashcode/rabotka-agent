@@ -1,6 +1,8 @@
 import { AgentBaseController } from "./base-controller";
 import type {
   AgentCandidate,
+  AgentNotificationsPage,
+  PushSubscriptionBody,
   AgentStats,
   AgentWallet,
   AgentWithdrawal,
@@ -120,6 +122,31 @@ class AgentController extends AgentBaseController {
     return this.post(`/agent/withdrawals/${encodeURIComponent(id)}/cancel`);
   }
 
+  listNotifications(page = 1, limit = 20): Promise<AgentNotificationsPage> {
+    return this.get(`/agent/notifications?page=${page}&limit=${limit}`);
+  }
+
+  markNotificationRead(id: string): Promise<{ unread: number }> {
+    return this.post(`/agent/notifications/${encodeURIComponent(id)}/read`);
+  }
+
+  markAllNotificationsRead(): Promise<{ unread: number }> {
+    return this.post("/agent/notifications/read-all");
+  }
+
+  /** The VAPID public key Web Push subscriptions are made with. */
+  getPushKey(): Promise<{ publicKey: string }> {
+    return this.get("/agent/notifications/push/key");
+  }
+
+  subscribePush(body: PushSubscriptionBody): Promise<{ success: true }> {
+    return this.post("/agent/notifications/push/subscribe", body);
+  }
+
+  unsubscribePush(endpoint: string): Promise<{ success: true }> {
+    return this.post("/agent/notifications/push/unsubscribe", { endpoint });
+  }
+
   logCall(leadId: string, outcome: CallOutcome, note?: string): Promise<AgentLead> {
     return this.post(`/agent/leads/${encodeURIComponent(leadId)}/calls`, {
       outcome,
@@ -148,3 +175,9 @@ export const listAllPlacements = controller.listAllPlacements.bind(controller);
 export const listWithdrawals = controller.listWithdrawals.bind(controller);
 export const requestWithdrawal = controller.requestWithdrawal.bind(controller);
 export const cancelWithdrawal = controller.cancelWithdrawal.bind(controller);
+export const listNotifications = controller.listNotifications.bind(controller);
+export const markNotificationRead = controller.markNotificationRead.bind(controller);
+export const markAllNotificationsRead = controller.markAllNotificationsRead.bind(controller);
+export const getPushKey = controller.getPushKey.bind(controller);
+export const subscribePush = controller.subscribePush.bind(controller);
+export const unsubscribePush = controller.unsubscribePush.bind(controller);

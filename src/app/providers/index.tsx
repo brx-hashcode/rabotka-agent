@@ -8,6 +8,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { TooltipProvider } from "#/components/ui/tooltip";
 import { Toaster } from "#/components/ui/sonner";
+import { NotificationsLive } from "#/features/notifications/components/notifications-live";
 import { setSessionExpiredHandler } from "#/lib/auth/session-client";
 import { httpStatusOf } from "#/lib/api/friendly-error";
 import { SessionProvider } from "./session-context";
@@ -77,6 +78,7 @@ export function Providers({ children, isAuthenticated }: ProvidersProps) {
           <NuqsAdapter>
             <TooltipProvider>
               {children}
+              <NotificationsLive />
               <Toaster position="top-center" />
             </TooltipProvider>
           </NuqsAdapter>
