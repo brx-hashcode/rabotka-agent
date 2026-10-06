@@ -1,10 +1,18 @@
 import { Suspense } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { IconArrowLeft, IconCheck } from "@tabler/icons-react";
 
 import { BrandLogo } from "#/components/brand-logo";
 import { SignInFlow } from "#/features/auth/components/sign-in-flow";
+import { HeroCarousel } from "#/features/jobs/components/hero-carousel";
+
+/**
+ * Unsplash, in full colour, cross-fading like the home hero: chair maker
+ * (photo-1688241320695-6ca991df8818), basket weaver (photo-1688240817677-
+ * d28b8e232dd4), cook (photo-1784459996808-d44b40f78616), seamstresses
+ * (photo-1790943780822-9918073fe9f1).
+ */
+const PHOTOS = ["craftsman", "weaver", "cook", "seamstresses"].map((n) => `/sign-in/${n}.jpg`);
 
 const POINTS = [
   "Les offres ouvertes de vos zones, en un coup d'œil",
@@ -25,14 +33,11 @@ export default function SignInPage() {
   return (
     <div className="grid min-h-svh bg-card lg:grid-cols-5">
       <aside className="relative col-span-3 m-4 hidden overflow-hidden rounded-3xl bg-ink text-white lg:flex">
-        {/* Unsplash photo-1688241320695-6ca991df8818, shown in full colour. */}
-        <Image
-          src="/sign-in-craftsman.jpg"
-          alt=""
-          fill
+        <HeroCarousel
+          className="absolute inset-0"
+          photos={PHOTOS}
           sizes="60vw"
-          priority
-          className="object-cover object-[50%_30%]"
+          imageClassName="object-[50%_30%]"
         />
         {/* Darkens the lower part only, for the text; the photo stays clear above. */}
         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-black/90 via-black/65 to-transparent" />
