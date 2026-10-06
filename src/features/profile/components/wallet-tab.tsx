@@ -12,6 +12,7 @@ import {
   IconHourglass,
   IconInfoCircle,
   IconReceipt,
+  IconX,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 
@@ -145,18 +146,11 @@ function PendingRequest({ withdrawal: w }: Readonly<{ withdrawal: AgentWithdrawa
 
   return (
     <div className="flex w-full flex-col gap-2 rounded-2xl bg-white/60 p-4 sm:w-80 dark:bg-black/20">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center">
         <span className="inline-flex items-center gap-1.5 rounded-full bg-chip-amber px-2.5 py-1 font-medium text-chip-amber-foreground text-xs">
           <IconClockHour4 className="size-3.5" />
           Retrait en attente
         </span>
-        <button
-          type="button"
-          onClick={() => setConfirming(true)}
-          className="rounded-full px-2 py-1 font-medium text-header-muted text-xs transition-colors hover:bg-white/70 hover:text-header-foreground"
-        >
-          Annuler
-        </button>
       </div>
       <p className="font-semibold text-2xl tabular-nums tracking-tight">{formatXAF(w.amount)}</p>
       <p className="text-header-muted text-xs leading-relaxed">
@@ -164,6 +158,15 @@ function PendingRequest({ withdrawal: w }: Readonly<{ withdrawal: AgentWithdrawa
         <br />
         Demandé le {format(new Date(w.createdAt), "d MMM 'à' HH'h'mm", { locale: fr })}
       </p>
+      <Button
+        size="lg"
+        variant="destructive"
+        className="mt-1 w-full rounded-full"
+        onClick={() => setConfirming(true)}
+      >
+        <IconX />
+        Annuler la demande
+      </Button>
 
       <ActionDialog
         open={confirming}
