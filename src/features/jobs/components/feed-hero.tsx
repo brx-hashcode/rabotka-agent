@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import Image from "next/image";
+
 import { IconMapPin, IconSearch, IconX } from "@tabler/icons-react";
 
 import { Button } from "#/components/ui/button";
 import { useAgentMe } from "#/hooks/use-agent-me";
 import { useFeedFilters, useFeedMode } from "#/hooks/use-jobs-feed";
+import { HeroCarousel } from "./hero-carousel";
 import { LocationPicker, type Place } from "./location-picker";
 
 /** A 14-point starburst, as the photo frame in the mockup. */
@@ -48,20 +49,10 @@ export function FeedHero() {
   return (
     <section className="relative shrink-0 overflow-hidden bg-header text-header-foreground">
       <div className="relative mx-auto w-full max-w-6xl px-4 pt-8 pb-10 sm:px-6 md:pt-12 md:pb-14">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute top-0 right-6 hidden h-[230px] w-[230px] md:block lg:right-28"
+        <HeroCarousel
+          className="absolute top-0 right-6 hidden h-[230px] w-[230px] md:block lg:right-28"
           style={{ clipPath: STARBURST }}
-        >
-          <Image
-            src="/hero-workers.jpg"
-            alt=""
-            fill
-            sizes="230px"
-            className="object-cover grayscale"
-            priority
-          />
-        </div>
+        />
 
         <div className="relative max-w-xl space-y-3">
           <h1 className="font-semibold text-[28px] leading-tight tracking-tight sm:text-4xl">
