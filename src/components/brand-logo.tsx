@@ -4,10 +4,11 @@ import { cn } from "#/lib/utils";
 
 /**
  * The logo lockup exactly as rabotka-client's header draws it
- * (src/features/landing/components/header.tsx): the full-resolution logo at
- * 40px (object-contain, multiply-blended into the background), "Rabotka" in
- * Gilroy bold, the slogan under it. `unoptimized` serves the original PNG —
- * Next's resize to a small WebP was what made it look pixelated.
+ * (src/features/landing/components/header.tsx): public/rabotka-logo.png at
+ * full resolution, 40px, "Rabotka" in Gilroy bold, the slogan under it.
+ * `unoptimized` serves the original PNG — Next's resize to a small WebP was
+ * what made it look pixelated. No mix-blend-multiply (the client's, on white):
+ * on the lime band it tinted the logo's white figures green.
  */
 export function BrandLogo({
   tone = "light",
@@ -22,7 +23,7 @@ export function BrandLogo({
         height={40}
         unoptimized
         priority
-        className="size-10 object-contain mix-blend-multiply"
+        className="size-10 object-contain"
       />
       <span className="flex flex-col leading-none">
         <span className="font-bold font-display text-xl">Rabotka</span>
