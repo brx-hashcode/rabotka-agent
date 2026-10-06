@@ -76,7 +76,7 @@ export function FeedHero() {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Poste ou référence"
-              className="min-w-0 flex-1 bg-transparent py-3 text-[15px] outline-none placeholder:text-muted-foreground"
+              className="min-w-0 flex-1 bg-transparent py-3 text-base outline-none md:text-[15px] placeholder:text-muted-foreground"
             />
           </label>
 
