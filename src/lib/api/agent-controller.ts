@@ -8,6 +8,7 @@ import type {
   JobsPage,
   LeadInvite,
   LeadPlacement,
+  JobPlacement,
   JobsQuery,
   PhoneReveal,
   WorkerLookup,
@@ -57,6 +58,11 @@ class AgentController extends AgentBaseController {
     return this.post(`/agent/leads/${encodeURIComponent(leadId)}/place`);
   }
 
+  /** The workers this agent placed on one job, newest first. */
+  getPlacements(jobId: string): Promise<JobPlacement[]> {
+    return this.get(`/agent/jobs/${encodeURIComponent(jobId)}/placements`);
+  }
+
   /** Find a worker outside the suggestions by their WhatsApp number (logged, capped). */
   lookupWorker(jobId: string, phone: string): Promise<WorkerLookup> {
     return this.post(`/agent/jobs/${encodeURIComponent(jobId)}/worker-lookup`, { phone });
@@ -91,5 +97,6 @@ export const revealPhone = controller.revealPhone.bind(controller);
 export const logCall = controller.logCall.bind(controller);
 export const inviteLead = controller.inviteLead.bind(controller);
 export const placeLead = controller.placeLead.bind(controller);
+export const getPlacements = controller.getPlacements.bind(controller);
 export const lookupWorker = controller.lookupWorker.bind(controller);
 export const placeByPhone = controller.placeByPhone.bind(controller);

@@ -9,6 +9,7 @@ import { useCandidates } from "#/hooks/use-candidates";
 import { useJobDetail } from "#/hooks/use-job-detail";
 import { cn } from "#/lib/utils";
 import { CandidatesList } from "./candidates";
+import { Placements } from "./placements";
 import {
   JobDetailSkeleton,
   JobHeader,
@@ -131,7 +132,8 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
             <JobSummary detail={detail.data} headerClassName="max-lg:hidden" />
           </div>
         </div>
-        <div className={cn(tab !== "candidats" && "max-lg:hidden")}>
+        <div className={cn("flex flex-col gap-8", tab !== "candidats" && "max-lg:hidden")}>
+          <Placements jobId={id} />
           <CandidatesList jobId={id} countryCode={detail.data.job.countryCode} />
         </div>
       </div>

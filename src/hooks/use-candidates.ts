@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   claimLead,
   getCandidates,
+  getPlacements,
   inviteLead,
   logCall,
   lookupWorker,
@@ -13,6 +14,17 @@ import {
 import type { AgentCandidate, AgentLead, CallOutcome } from "#/lib/api/types";
 
 export const candidatesKey = (jobId: string) => ["candidates", jobId] as const;
+export const placementsKey = (jobId: string) => ["placements", jobId] as const;
+
+/** The workers this agent placed on a job. */
+export function usePlacements(jobId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: placementsKey(jobId),
+    queryFn: () => getPlacements(jobId),
+    enabled,
+    staleTime: 30_000,
+  });
+}
 
 /** Suggested workers for a job in the agent's zones. */
 export function useCandidates(jobId: string, enabled: boolean) {
@@ -81,9 +93,13 @@ export function useInviteLead(jobId: string) {
 /** Places the worker directly: creates their application, credited to the agent. */
 export function usePlaceLead(jobId: string) {
   const write = useLeadWriter(jobId);
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: placeLead,
-    onSuccess: (result) => write(result.lead),
+    onSuccess: (result) => {
+      write(result.lead);
+      void queryClient.invalidateQueries({ queryKey: placementsKey(jobId) });
+    },
   });
 }
 
@@ -97,6 +113,10 @@ export function usePlaceByPhone(jobId: string) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (phone: string) => placeByPhone(jobId, phone),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: candidatesKey(jobId) }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: candidatesKey(jobId) }),
+        queryClient.invalidateQueries({ queryKey: placementsKey(jobId) }),
+      ]),
   });
 }

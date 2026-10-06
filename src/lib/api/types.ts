@@ -158,6 +158,33 @@ export type LeadPlacement = {
   lead: AgentLead;
 };
 
+export type ApplicationStatus =
+  | "PENDING"
+  | "VIEWED"
+  | "WAITING_PAYMENT"
+  | "ACCEPTED"
+  | "REJECTED"
+  | "CANCELLED"
+  | "STARTED"
+  | "END";
+
+/** `GET agent/jobs/:id/placements` — a worker this agent placed on the job. */
+export type JobPlacement = {
+  applicationId: string;
+  status: ApplicationStatus;
+  placedAt: string;
+  updatedAt: string;
+  /** The lead behind it, for the phone reveal; null for very old placements. */
+  leadId: string | null;
+  worker: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    avatarUrl: string | null;
+    city: string | null;
+  };
+};
+
 /** `POST agent/jobs/:id/worker-lookup` — a worker outside the suggestions. */
 export type WorkerLookup = {
   worker: {
