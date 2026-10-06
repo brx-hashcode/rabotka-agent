@@ -6,10 +6,7 @@ import { usePathname } from "next/navigation";
 import { BrandLogo } from "#/components/brand-logo";
 import { Button } from "#/components/ui/button";
 import { useSession } from "#/app/providers/session-context";
-import { cn } from "#/lib/utils";
 import { AgentMenu } from "./agent-menu";
-
-const NAV = [{ href: "/", label: "Offres", match: (p: string) => p === "/" || p.startsWith("/jobs") }];
 
 /**
  * The black band the mockup opens with. On "/" the feed hero continues it.
@@ -30,28 +27,6 @@ export function SiteHeader() {
         <Link href="/" aria-label="Rabotka — accueil">
           <BrandLogo tone="dark" />
         </Link>
-
-        <nav className="hidden h-full items-stretch gap-8 sm:flex" aria-label="Navigation">
-          {NAV.map((item) => {
-            const active = item.match(pathname);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "relative flex items-center font-medium text-sm transition-colors",
-                  active ? "font-semibold text-header-foreground" : "text-header-muted hover:text-header-foreground",
-                )}
-              >
-                {active && (
-                  <span className="absolute inset-x-0 top-0 h-0.5 rounded-b bg-header-foreground" />
-                )}
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
 
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
