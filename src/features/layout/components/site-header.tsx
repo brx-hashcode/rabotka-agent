@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { BrandLogo } from "#/components/brand-logo";
 import { Button } from "#/components/ui/button";
 import { useSession } from "#/app/providers/session-context";
 import { cn } from "#/lib/utils";
@@ -27,18 +27,8 @@ export function SiteHeader() {
   return (
     <header className="bg-header text-header-foreground">
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between gap-6 px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5 font-semibold">
-          <Image
-            src="/rabotka-logo.png"
-            alt=""
-            width={32}
-            height={32}
-            className="rounded-lg"
-            priority
-          />
-          <span className="text-[15px]">
-            Rabotka
-          </span>
+        <Link href="/" aria-label="Rabotka — accueil">
+          <BrandLogo tone="dark" />
         </Link>
 
         <nav className="hidden h-full items-stretch gap-8 sm:flex" aria-label="Navigation">

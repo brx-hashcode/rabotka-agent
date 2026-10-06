@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { IconArrowLeft, IconCheck } from "@tabler/icons-react";
 
+import { BrandLogo } from "#/components/brand-logo";
 import { SignInFlow } from "#/features/auth/components/sign-in-flow";
 
 const POINTS = [
@@ -34,14 +35,8 @@ export default function SignInPage() {
         />
         <div className="absolute inset-0 bg-linear-to-t from-header via-header/70 to-header/10" />
 
-        <Link
-          href="/"
-          className="absolute top-8 left-10 z-10 flex items-center gap-2.5 font-semibold"
-        >
-          <Image src="/rabotka-logo.png" alt="" width={32} height={32} className="rounded-lg" />
-          <span className="text-[15px]">
-            Rabotka
-          </span>
+        <Link href="/" aria-label="Rabotka — accueil" className="absolute top-8 left-10 z-10">
+          <BrandLogo tone="dark" />
         </Link>
 
         <div className="relative mt-auto flex max-w-xl flex-col gap-6 p-12">
@@ -67,11 +62,8 @@ export default function SignInPage() {
 
       <section className="col-span-2 flex flex-col px-6 py-10 sm:px-12">
         {/* No header on this page: below lg the photo panel (and its logo) is hidden. */}
-        <Link href="/" className="flex items-center gap-2.5 font-semibold lg:hidden">
-          <Image src="/rabotka-logo.png" alt="" width={32} height={32} className="rounded-lg" />
-          <span className="text-[15px]">
-            Rabotka
-          </span>
+        <Link href="/" aria-label="Rabotka — accueil" className="self-start lg:hidden">
+          <BrandLogo />
         </Link>
 
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col pt-10 pb-10 lg:justify-center lg:py-10">
