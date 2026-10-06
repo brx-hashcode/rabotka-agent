@@ -38,9 +38,12 @@
   --radius: 0.625rem;
   /* Agent app shell: light grey page under a near-black header band. */
   --page: #f1f4f8;
-  --header: #0b0f12;
-  --header-foreground: #f5f7f8;
-  --header-muted: #9aa4ab;
+  /* Brand lime band (header, hero, sign-in panel) with dark text on it. */
+  --header: #cbffa5;
+  --header-foreground: #0f2414;
+  --header-muted: #3f5f3a;
+  /* Dark ink for fills that need white on top (ticked checkboxes, active tabs). */
+  --ink: #0f2414;
   /* Soft job-card chips. */
   --chip-violet: #f1ecfd;
   --chip-violet-foreground: #6b46c1;
@@ -312,6 +315,7 @@ a {
   --color-header: var(--header);
   --color-header-foreground: var(--header-foreground);
   --color-header-muted: var(--header-muted);
+  --color-ink: var(--ink);
   --color-chip-violet: var(--chip-violet);
   --color-chip-violet-foreground: var(--chip-violet-foreground);
   --color-chip-green: var(--chip-green);

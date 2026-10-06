@@ -41,11 +41,11 @@ export function SiteHeader() {
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "relative flex items-center font-medium text-sm transition-colors",
-                  active ? "text-whatsapp" : "text-header-muted hover:text-header-foreground",
+                  active ? "font-semibold text-header-foreground" : "text-header-muted hover:text-header-foreground",
                 )}
               >
                 {active && (
-                  <span className="absolute inset-x-0 top-0 h-0.5 rounded-b bg-whatsapp" />
+                  <span className="absolute inset-x-0 top-0 h-0.5 rounded-b bg-header-foreground" />
                 )}
                 {item.label}
               </Link>
@@ -58,8 +58,9 @@ export function SiteHeader() {
             <AgentMenu />
           ) : (
             <Button
+              variant="ghost"
               render={<Link href={signInHref} scroll={false} />}
-              className="rounded-full px-5"
+              className="rounded-full bg-ink px-5 text-white hover:bg-ink/90"
             >
               Se connecter
             </Button>

@@ -16,7 +16,7 @@ function Checkbox({
       className={cn(
         // Outline drawn as an inset shadow so it reads on the grey page as on
         // white; ticked, it fills with the header's near-black (as the mockup).
-        "peer size-4.5 shrink-0 cursor-pointer rounded-[5px] bg-card text-white shadow-[inset_0_0_0_1.5px_color-mix(in_oklab,var(--foreground)_28%,transparent)] transition-[background-color,box-shadow] outline-none hover:shadow-[inset_0_0_0_1.5px_color-mix(in_oklab,var(--foreground)_50%,transparent)] focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=checked]:bg-header data-[state=checked]:shadow-none disabled:cursor-not-allowed disabled:opacity-50",
+        "peer size-4.5 shrink-0 cursor-pointer rounded-[5px] bg-card text-white shadow-[inset_0_0_0_1.5px_color-mix(in_oklab,var(--foreground)_28%,transparent)] transition-[background-color,box-shadow] outline-none hover:shadow-[inset_0_0_0_1.5px_color-mix(in_oklab,var(--foreground)_50%,transparent)] focus-visible:ring-[3px] focus-visible:ring-ring/50 data-[state=checked]:bg-ink data-[state=checked]:shadow-none disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}

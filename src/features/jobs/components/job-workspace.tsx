@@ -115,7 +115,7 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
               onClick={() => setTab(value)}
               className={cn(
                 "rounded-full py-2.5 font-medium text-sm transition-colors",
-                tab === value ? "bg-header text-header-foreground" : "text-muted-foreground",
+                tab === value ? "bg-ink text-white" : "text-muted-foreground",
               )}
             >
               {label}

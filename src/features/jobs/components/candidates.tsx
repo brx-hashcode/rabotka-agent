@@ -526,17 +526,17 @@ function MyLead({
                 onClick={() => setOutcome(o.value)}
                 className={cn(
                   "flex flex-col items-start gap-1.5 rounded-2xl px-3.5 py-3 text-left transition-colors",
-                  active ? "bg-header text-header-foreground" : "bg-page hover:bg-muted",
+                  active ? "bg-ink text-white" : "bg-page hover:bg-muted",
                 )}
               >
                 <o.icon
                   className={cn(
                     "size-5",
-                    active ? "text-whatsapp" : o.closes ? "text-muted-foreground" : "text-whatsapp-dark",
+                    active ? "text-header" : o.closes ? "text-muted-foreground" : "text-whatsapp-dark",
                   )}
                 />
                 <span className="font-medium text-sm">{o.label}</span>
-                <span className={cn("text-xs", active ? "text-header-muted" : "text-muted-foreground")}>
+                <span className={cn("text-xs", active ? "text-white/70" : "text-muted-foreground")}>
                   {o.hint}
                 </span>
               </button>

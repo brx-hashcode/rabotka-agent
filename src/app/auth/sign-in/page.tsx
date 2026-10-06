@@ -50,7 +50,7 @@ export default function SignInPage() {
           <ul className="flex flex-col gap-3">
             {POINTS.map((point) => (
               <li key={point} className="flex items-center gap-3 text-sm">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-whatsapp/15 text-whatsapp">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-ink/10 text-ink">
                   <IconCheck className="size-3.5" strokeWidth={3} />
                 </span>
                 {point}

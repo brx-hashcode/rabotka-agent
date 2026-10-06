@@ -32,7 +32,7 @@ export function AgentMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="group flex items-center gap-2.5 rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-whatsapp/60 focus-visible:ring-offset-2 focus-visible:ring-offset-header sm:py-1 sm:pr-2 sm:pl-3 sm:hover:bg-white/10"
+        className="group flex items-center gap-2.5 rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ink/50 focus-visible:ring-offset-2 focus-visible:ring-offset-header sm:py-1 sm:pr-2 sm:pl-3 sm:hover:bg-black/5"
         aria-label="Mon compte"
       >
         {agent && (
@@ -41,7 +41,7 @@ export function AgentMenu() {
             <span className="max-w-48 truncate text-header-muted text-xs">{agent.email}</span>
           </span>
         )}
-        {avatar("size-9 ring-2 ring-white/15")}
+        {avatar("size-9 ring-2 ring-black/10")}
         <IconChevronDown className="hidden size-4 text-header-muted transition-transform group-data-[state=open]:rotate-180 sm:block" />
       </DropdownMenuTrigger>
 
