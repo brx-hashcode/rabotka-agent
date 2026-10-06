@@ -35,6 +35,7 @@ import {
   useCandidates,
   useClaimLead,
   useInviteLead,
+  usePlaceLead,
   useLogCall,
   useRevealPhone,
 } from "#/hooks/use-candidates";
@@ -202,7 +203,12 @@ function LeadActions({
   const [confirming, setConfirming] = useState(false);
 
   if (lead.status === "CONFIRMED") {
-    return <StatusLine tone="green">A postulé à l&apos;offre</StatusLine>;
+    return (
+      <StatusLine tone="green">
+        <IconCircleCheck className="size-4" />
+        Placé(e) sur l&apos;offre
+      </StatusLine>
+    );
   }
 
   if (lead.mine) {
@@ -267,7 +273,8 @@ function MyLead({
   const reveal = useRevealPhone();
   const logCall = useLogCall(jobId);
   const invite = useInviteLead(jobId);
-  const [dialog, setDialog] = useState<"reveal" | "call" | "place" | null>(null);
+  const place = usePlaceLead(jobId);
+  const [dialog, setDialog] = useState<"reveal" | "call" | "place" | "invite" | null>(null);
   const [sent, setSent] = useState<LeadInvite | null>(null);
   const [outcome, setOutcome] = useState<CallOutcome | null>(null);
   const [note, setNote] = useState("");
@@ -359,13 +366,48 @@ function MyLead({
         }
       />
 
-      <Placement lead={lead} workerName={workerName} onPlace={() => setDialog("place")} />
+      <Placement
+        lead={lead}
+        workerName={workerName}
+        onPlace={() => setDialog("place")}
+        onInvite={() => setDialog("invite")}
+      />
 
       <ActionDialog
         open={dialog === "place"}
         onOpenChange={(open) => setDialog(open ? "place" : null)}
-        icon={<IconSend className="size-5" />}
+        icon={<IconUserPlus className="size-5" />}
         title={`Placer ${workerName} sur l'offre ?`}
+        description={`Une candidature est créée au nom de ${workerName} pour cette offre, et le placement vous est attribué. ${workerName} en est informé(e) par WhatsApp.`}
+        confirmLabel={`Placer ${workerName}`}
+        pending={place.isPending}
+        onConfirm={() =>
+          place.mutate(lead.id, {
+            onSuccess: (result) => {
+              setDialog(null);
+              toast.success(
+                result.sentToWorker
+                  ? `${workerName} est placé(e) sur l'offre et en a été informé(e) sur WhatsApp.`
+                  : `${workerName} est placé(e) sur l'offre. Prévenez-le ou la directement.`,
+              );
+            },
+            onError: (err) => {
+              setDialog(null);
+              toast.error(friendlyError(err, "Impossible de placer ce travailleur."));
+            },
+          })
+        }
+      >
+        <p className="rounded-2xl bg-chip-amber px-4 py-3 text-chip-amber-foreground text-sm">
+          Confirmez seulement si {workerName} a donné son accord pendant l&apos;appel.
+        </p>
+      </ActionDialog>
+
+      <ActionDialog
+        open={dialog === "invite"}
+        onOpenChange={(open) => setDialog(open ? "invite" : null)}
+        icon={<IconSend className="size-5" />}
+        title={`Envoyer une invitation à ${workerName} ?`}
         description={`Rabotka crée une invitation personnelle à cette offre pour ${workerName}. Dès qu'il ou elle l'accepte, sa candidature est créée et le placement vous est attribué.${lead.status === "INVITED" ? " Le nouveau lien remplace le précédent." : ""}`}
         confirmLabel={lead.status === "INVITED" ? "Renvoyer l'invitation" : "Envoyer l'invitation"}
         pending={invite.isPending}
@@ -526,7 +568,22 @@ function Placement({
   lead,
   workerName,
   onPlace,
-}: Readonly<{ lead: AgentLead; workerName: string; onPlace: () => void }>) {
+  onInvite,
+}: Readonly<{
+  lead: AgentLead;
+  workerName: string;
+  onPlace: () => void;
+  onInvite: () => void;
+}>) {
+  const agreed = lead.lastCall?.outcome === "INTERESTED";
+
+  const placeButton = agreed && (
+    <Button size="lg" className="w-full rounded-full" onClick={onPlace}>
+      <IconUserPlus />
+      Placer {workerName} sur l&apos;offre
+    </Button>
+  );
+
   if (lead.status === "INVITED") {
     const expires = lead.inviteExpiresAt ? new Date(lead.inviteExpiresAt) : null;
     return (
@@ -542,7 +599,8 @@ function Placement({
             ? `${workerName} n'a pas répondu à temps. Renvoyez-lui un nouveau lien.`
             : `En attente de sa réponse · le lien expire le ${format(expires, "d MMM 'à' HH'h'mm", { locale: fr })}.`}
         </p>
-        <Button size="lg" variant="secondary" className="rounded-full" onClick={onPlace}>
+        {placeButton}
+        <Button size="lg" variant="secondary" className="rounded-full" onClick={onInvite}>
           <IconSend />
           Renvoyer l&apos;invitation
         </Button>
@@ -550,12 +608,18 @@ function Placement({
     );
   }
 
-  if (lead.lastCall?.outcome === "INTERESTED") {
+  if (agreed) {
     return (
-      <Button size="lg" className="w-full rounded-full" onClick={onPlace}>
-        <IconUserPlus />
-        Placer {workerName} sur l&apos;offre
-      </Button>
+      <div className="flex flex-col gap-1">
+        {placeButton}
+        <button
+          type="button"
+          onClick={onInvite}
+          className="self-center rounded-full px-3 py-1.5 text-muted-foreground text-xs transition-colors hover:bg-card hover:text-foreground"
+        >
+          Ou envoyer une invitation à {workerName}
+        </button>
+      </div>
     );
   }
 

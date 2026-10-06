@@ -5,6 +5,7 @@ import {
   getCandidates,
   inviteLead,
   logCall,
+  placeLead,
   revealPhone,
 } from "#/lib/api/agent-controller";
 import type { AgentCandidate, AgentLead, CallOutcome } from "#/lib/api/types";
@@ -71,6 +72,15 @@ export function useInviteLead(jobId: string) {
   const write = useLeadWriter(jobId);
   return useMutation({
     mutationFn: inviteLead,
+    onSuccess: (result) => write(result.lead),
+  });
+}
+
+/** Places the worker directly: creates their application, credited to the agent. */
+export function usePlaceLead(jobId: string) {
+  const write = useLeadWriter(jobId);
+  return useMutation({
+    mutationFn: placeLead,
     onSuccess: (result) => write(result.lead),
   });
 }

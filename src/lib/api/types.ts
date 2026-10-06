@@ -150,6 +150,14 @@ export type PhoneReveal = {
   revealsLeftToday: number;
 };
 
+/** `POST agent/leads/:id/place` — the application created by the agent. */
+export type LeadPlacement = {
+  applicationId: string;
+  /** True when Rabotka told the worker by WhatsApp. */
+  sentToWorker: boolean;
+  lead: AgentLead;
+};
+
 /** `POST agent/leads/:id/invite` — the placement invitation. */
 export type LeadInvite = {
   inviteUrl: string;
