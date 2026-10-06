@@ -29,7 +29,9 @@ export default async function RootLayout({ children, modal }: LayoutProps<"/">) 
 
   return (
     <html lang="fr" translate="no" suppressHydrationWarning>
-      <body className="min-h-svh bg-page antialiased">
+      {/* Extensions such as Grammarly add attributes to <body> before React
+          hydrates; only this element's own attributes are exempt. */}
+      <body className="min-h-svh bg-page antialiased" suppressHydrationWarning>
         <Providers isAuthenticated={isAuthenticated}>
           {children}
           {modal}

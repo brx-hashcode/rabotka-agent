@@ -47,6 +47,7 @@ import type {
   LeadInvite,
   PhoneReveal,
 } from "#/lib/api/types";
+import { copyText } from "#/lib/clipboard";
 import { cn, getInitials } from "#/lib/utils";
 import { ActionDialog } from "./action-dialog";
 import { OffListPlacement } from "./off-list-placement";
@@ -539,9 +540,11 @@ function MyLead({
               variant="secondary"
               className="rounded-full"
               onClick={() =>
-                void navigator.clipboard
-                  .writeText(sent.message)
-                  .then(() => toast.success("Message copié"))
+                void copyText(sent.message).then((ok) =>
+                  ok
+                    ? toast.success("Message copié")
+                    : toast.error("Copie impossible. Sélectionnez le message pour le copier."),
+                )
               }
             >
               <IconCopy />

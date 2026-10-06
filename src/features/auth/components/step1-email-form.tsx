@@ -62,7 +62,7 @@ export function Step1EmailForm({
                   autoComplete="email"
                   disabled={isLoading}
                   autoFocus
-                  className="h-12 rounded-full border-0 bg-page px-5 text-[15px] shadow-none focus-visible:ring-2 focus-visible:ring-whatsapp/40"
+                  className="h-12 rounded-full border-0 bg-page px-5 text-base shadow-none md:text-[15px] focus-visible:ring-2 focus-visible:ring-whatsapp/40"
                 />
               </FormControl>
               <FormMessage />

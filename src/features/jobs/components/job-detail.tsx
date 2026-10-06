@@ -34,6 +34,7 @@ import {
   postedAgo,
   seatsLabel,
 } from "#/lib/job-labels";
+import { copyText } from "#/lib/clipboard";
 import { cn, formatXAF } from "#/lib/utils";
 
 /** Shares a job link: the phone's share sheet, or a copied link. */
@@ -43,8 +44,8 @@ export async function shareJob(title: string, jobPath: string) {
     await navigator.share({ title, url }).catch(() => undefined);
     return;
   }
-  await navigator.clipboard.writeText(url);
-  toast.success("Lien de l'offre copié");
+  if (await copyText(url)) toast.success("Lien de l'offre copié");
+  else toast.error(`Copie impossible. Lien : ${url}`);
 }
 
 
