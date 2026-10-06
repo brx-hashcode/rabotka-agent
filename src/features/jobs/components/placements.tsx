@@ -3,7 +3,16 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { IconBrandWhatsapp, IconPhone, IconPhoneCall, IconUserCheck } from "@tabler/icons-react";
+import {
+  IconBrandWhatsapp,
+  IconCheck,
+  IconCopy,
+  IconEye,
+  IconLock,
+  IconPhone,
+  IconPhoneCall,
+  IconUserCheck,
+} from "@tabler/icons-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -11,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { Button } from "#/components/ui/button";
 import { usePlacements, useRevealPhone } from "#/hooks/use-candidates";
 import { friendlyError } from "#/lib/api/friendly-error";
+import { copyText } from "#/lib/clipboard";
 import type { JobPlacement, PhoneReveal } from "#/lib/api/types";
 import { cn, getInitials } from "#/lib/utils";
 import { applicationStatus } from "#/features/jobs/application-status";
@@ -76,22 +86,46 @@ function PlacementRow({ placement: p }: Readonly<{ placement: JobPlacement }>) {
         </span>
       </div>
 
-      {p.leadId &&
-        (revealed ? (
-          <div className="flex flex-wrap items-center gap-2 rounded-xl bg-page p-2 pl-4">
-            <span className="mr-auto font-semibold tabular-nums tracking-wide">
-              {phone ?? "Numéro non renseigné"}
+      {p.leadId && (
+        <div className="flex flex-col gap-3 rounded-2xl bg-page p-3 sm:ml-14 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <span
+              className={cn(
+                "flex size-10 shrink-0 items-center justify-center rounded-xl",
+                revealed ? "bg-chip-green text-chip-green-foreground" : "bg-card text-muted-foreground",
+              )}
+            >
+              {revealed ? <IconPhone className="size-5" /> : <IconLock className="size-5" />}
             </span>
-            {phone && (
-              <>
-                <Button size="sm" className="rounded-full" render={<a href={`tel:${phone}`} />}>
+            <div className="min-w-0 flex-1">
+              {revealed ? (
+                <>
+                  <p className="text-muted-foreground text-xs">Numéro de {p.worker.firstName}</p>
+                  <div className="flex items-center gap-1">
+                    <p className="truncate font-semibold tabular-nums tracking-wide">
+                      {phone ?? "Non renseigné"}
+                    </p>
+                    {phone && <CopyButton value={phone} />}
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="font-medium text-sm">Numéro masqué</p>
+                  <p className="text-muted-foreground text-xs">Visible pour suivre ce placement</p>
+                </>
+              )}
+            </div>
+          </div>
+
+          {revealed ? (
+            phone && (
+              <div className="grid grid-cols-2 gap-2 sm:flex">
+                <Button className="rounded-full bg-ink text-white hover:bg-ink/90" render={<a href={`tel:${phone}`} />}>
                   <IconPhoneCall />
                   Appeler
                 </Button>
                 <Button
-                  size="sm"
-                  variant="secondary"
-                  className="rounded-full bg-card"
+                  className="rounded-full bg-whatsapp text-white hover:bg-whatsapp/90"
                   render={
                     <a href={`https://wa.me/${phone.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" />
                   }
@@ -99,20 +133,20 @@ function PlacementRow({ placement: p }: Readonly<{ placement: JobPlacement }>) {
                   <IconBrandWhatsapp />
                   WhatsApp
                 </Button>
-              </>
-            )}
-          </div>
-        ) : (
-          <Button
-            size="sm"
-            variant="secondary"
-            className="self-start rounded-full"
-            onClick={() => setConfirming(true)}
-          >
-            <IconPhone />
-            Voir le numéro
-          </Button>
-        ))}
+              </div>
+            )
+          ) : (
+            <Button
+              variant="secondary"
+              className="rounded-full bg-card hover:bg-card/80"
+              onClick={() => setConfirming(true)}
+            >
+              <IconEye />
+              Voir le numéro
+            </Button>
+          )}
+        </div>
+      )}
 
       <ActionDialog
         open={confirming}
@@ -137,5 +171,23 @@ function PlacementRow({ placement: p }: Readonly<{ placement: JobPlacement }>) {
         }
       />
     </div>
+  );
+}
+
+function CopyButton({ value }: Readonly<{ value: string }>) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      aria-label="Copier le numéro"
+      onClick={async () => {
+        if (!(await copyText(value))) return;
+        setCopied(true);
+        setTimeout(() => setCopied(false), 1500);
+      }}
+      className="flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-card hover:text-foreground"
+    >
+      {copied ? <IconCheck className="size-4 text-whatsapp-dark" /> : <IconCopy className="size-4" />}
+    </button>
   );
 }
