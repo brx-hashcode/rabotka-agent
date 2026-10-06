@@ -21,6 +21,7 @@ const PAGE_SIZE = 20;
 
 export const EMPLOYMENT_TYPES = ["MISSION", "CDD", "CDI", "STAGE"] as const;
 const SORTS = ["recent", "start"] as const;
+const SCOPES = ["zones", "all"] as const;
 
 const feedFilterParsers = {
   q: parseAsString.withDefault(""),
@@ -31,11 +32,24 @@ const feedFilterParsers = {
   min: parseAsInteger,
   max: parseAsInteger,
   sort: parseAsStringLiteral(SORTS).withDefault("recent"),
+  /** Signed-in agents: their zones (default) or every open job. */
+  scope: parseAsStringLiteral(SCOPES).withDefault("zones"),
 };
 
 /** Feed filters, kept in the URL so a filtered feed can be shared. */
 export function useFeedFilters() {
   return useQueryStates(feedFilterParsers);
+}
+
+/**
+ * Which feed "/" shows. A signed-in agent sees the jobs of their zones (full
+ * jobs, with pay) unless they cleared their zones to browse everywhere — then,
+ * like a visitor, every open job as a public summary.
+ */
+export function useFeedMode() {
+  const { isAuthenticated } = useSession();
+  const [{ scope }] = useFeedFilters();
+  return { isAuthenticated, zoneFeed: isAuthenticated && scope === "zones" };
 }
 
 export type FeedJob = PublicJob | AgentJob;
@@ -51,7 +65,7 @@ export function isAgentJob(job: FeedJob): job is AgentJob {
  * range, which the public feed never offers.
  */
 export function useJobsFeed() {
-  const { isAuthenticated } = useSession();
+  const { zoneFeed } = useFeedMode();
   const [f] = useFeedFilters();
 
   const common = {
@@ -60,15 +74,15 @@ export function useJobsFeed() {
     categories: f.categories.length ? f.categories : undefined,
     sort: f.sort,
   };
-  const query = isAuthenticated
+  const query = zoneFeed
     ? { ...common, minAmount: f.min ?? undefined, maxAmount: f.max ?? undefined }
     : { ...common, country: f.country || undefined, city: f.city || undefined };
 
   const feed = useInfiniteQuery<JobsPage<FeedJob>>({
-    queryKey: ["jobs", isAuthenticated ? "agent" : "public", query],
+    queryKey: ["jobs", zoneFeed ? "agent" : "public", query],
     queryFn: ({ pageParam }) => {
       const page = pageParam as number;
-      return isAuthenticated
+      return zoneFeed
         ? listAgentJobs({ ...query, page, limit: PAGE_SIZE })
         : listPublicJobs({ ...query, page, limit: PAGE_SIZE });
     },

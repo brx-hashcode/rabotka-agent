@@ -11,9 +11,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "#/components/ui/sheet";
-import { useSession } from "#/app/providers/session-context";
 import { useJobCategories } from "#/hooks/use-job-categories";
-import { useFeedFilters, useJobsFeed } from "#/hooks/use-jobs-feed";
+import { useFeedFilters, useFeedMode, useJobsFeed } from "#/hooks/use-jobs-feed";
 import { friendlyError } from "#/lib/api/friendly-error";
 import { cn } from "#/lib/utils";
 import { FiltersSidebar, useActiveFilterCount } from "./filters-sidebar";
@@ -22,7 +21,7 @@ import { SortSelect } from "./sort-select";
 
 /** The "/" feed below the hero: title row, filter sidebar, card grid. */
 export function JobsFeed() {
-  const { isAuthenticated } = useSession();
+  const { zoneFeed } = useFeedMode();
   const [filters] = useFeedFilters();
   const feed = useJobsFeed();
   const categories = useJobCategories();
@@ -54,14 +53,14 @@ export function JobsFeed() {
 
   const inner = usePageScrolledToEnd();
 
-  const sidebar = <FiltersSidebar facets={feed.facets} showPay={isAuthenticated} />;
+  const sidebar = <FiltersSidebar facets={feed.facets} showPay={zoneFeed} />;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:flex lg:h-svh lg:flex-col lg:pb-0">
       <div className="mb-6 flex shrink-0 flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-3">
           <h2 className="font-semibold text-2xl tracking-tight">
-            {isAuthenticated ? "Offres de vos zones" : "Offres ouvertes"}
+            {zoneFeed ? "Offres de vos zones" : "Offres ouvertes"}
           </h2>
           {feed.isSuccess && (
             <span className="text-muted-foreground text-sm tabular-nums">
@@ -135,9 +134,9 @@ export function JobsFeed() {
           {feed.isSuccess && feed.jobs.length === 0 && (
             <div className="flex flex-col items-center gap-2 rounded-2xl bg-card p-10 text-center">
               <IconMoodEmpty className="size-8 text-muted-foreground" />
-              <p className="font-medium">{emptyTitle(isAuthenticated, hasFilters)}</p>
+              <p className="font-medium">{emptyTitle(zoneFeed, hasFilters)}</p>
               <p className="max-w-sm text-muted-foreground text-sm">
-                {emptyText(isAuthenticated, hasFilters)}
+                {emptyText(zoneFeed, hasFilters)}
               </p>
             </div>
           )}
@@ -187,14 +186,14 @@ function usePageScrolledToEnd() {
   return atEnd;
 }
 
-function emptyTitle(isAuthenticated: boolean, hasFilters: boolean) {
+function emptyTitle(zoneFeed: boolean, hasFilters: boolean) {
   if (hasFilters) return "Aucune offre ne correspond";
-  return isAuthenticated ? "Aucune offre dans vos zones" : "Aucune offre ouverte";
+  return zoneFeed ? "Aucune offre dans vos zones" : "Aucune offre ouverte";
 }
 
-function emptyText(isAuthenticated: boolean, hasFilters: boolean) {
+function emptyText(zoneFeed: boolean, hasFilters: boolean) {
   if (hasFilters) return "Essayez une autre recherche, un autre lieu ou moins de filtres.";
-  return isAuthenticated
+  return zoneFeed
     ? "Revenez bientôt. Si vous n'avez aucune zone assignée, contactez votre responsable."
     : "Revenez bientôt : de nouvelles offres sont publiées chaque jour.";
 }

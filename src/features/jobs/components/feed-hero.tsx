@@ -2,12 +2,11 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import { IconMapPin, IconSearch } from "@tabler/icons-react";
+import { IconMapPin, IconSearch, IconX } from "@tabler/icons-react";
 
 import { Button } from "#/components/ui/button";
-import { useSession } from "#/app/providers/session-context";
 import { useAgentMe } from "#/hooks/use-agent-me";
-import { useFeedFilters } from "#/hooks/use-jobs-feed";
+import { useFeedFilters, useFeedMode } from "#/hooks/use-jobs-feed";
 import { LocationPicker, type Place } from "./location-picker";
 
 /** A 14-point starburst, as the photo frame in the mockup. */
@@ -28,7 +27,7 @@ const STARBURST = (() => {
  * button implies — typing does not refetch the feed on every key.
  */
 export function FeedHero() {
-  const { isAuthenticated } = useSession();
+  const { isAuthenticated, zoneFeed } = useFeedMode();
   const [filters, setFilters] = useFeedFilters();
   const [q, setQ] = useState(filters.q);
   const [place, setPlace] = useState<Place>({
@@ -40,7 +39,7 @@ export function FeedHero() {
     e.preventDefault();
     void setFilters({
       q: q.trim() || null,
-      ...(isAuthenticated
+      ...(zoneFeed
         ? {}
         : { country: place.country || null, city: place.city || null }),
     });
@@ -66,7 +65,7 @@ export function FeedHero() {
 
         <div className="relative max-w-xl space-y-3">
           <h1 className="font-semibold text-[28px] leading-tight tracking-tight sm:text-4xl">
-            {isAuthenticated ? "Les offres de votre zone" : "Trouvez les offres de votre zone"}
+            {heroTitle(isAuthenticated, zoneFeed)}
           </h1>
           <p className="text-header-muted text-sm sm:text-base">
             {isAuthenticated
@@ -93,7 +92,28 @@ export function FeedHero() {
           <span className="mx-4 h-px bg-border md:mx-6 md:h-8 md:w-px" aria-hidden />
 
           <div className="flex flex-1 items-center px-4 md:px-0">
-            {isAuthenticated ? <AgentZones /> : <LocationPicker value={place} onChange={setPlace} />}
+            {zoneFeed ? (
+              <AgentZones
+                onClear={() => void setFilters({ scope: "all", min: null, max: null })}
+              />
+            ) : (
+              <>
+                <LocationPicker value={place} onChange={setPlace} />
+                {isAuthenticated && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPlace({ country: "", city: "" });
+                      void setFilters({ scope: null, country: null, city: null });
+                    }}
+                    className="ml-2 inline-flex shrink-0 items-center gap-1 rounded-full bg-chip-green px-3 py-1.5 font-medium text-chip-green-foreground text-xs transition-colors hover:brightness-95"
+                  >
+                    <IconMapPin className="size-3.5" />
+                    Mes zones
+                  </button>
+                )}
+              </>
+            )}
           </div>
 
           <Button
@@ -109,15 +129,18 @@ export function FeedHero() {
   );
 }
 
-/** A signed-in agent's feed is limited to their zones; show them instead of a picker. */
-function AgentZones() {
+/**
+ * A signed-in agent's feed defaults to their zones (set by an admin), shown
+ * here instead of a picker. The ✕ switches to every open job, like a visitor.
+ */
+function AgentZones({ onClear }: Readonly<{ onClear: () => void }>) {
   const { data: agent } = useAgentMe();
   const zones = agent?.zones.map((z) => z.city).join(" · ");
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3 py-3 text-[15px]">
       <IconMapPin className="size-5 shrink-0 text-muted-foreground" />
-      <span className="truncate">
+      <span className="min-w-0 flex-1 truncate">
         {zones ? (
           <>
             <span className="text-muted-foreground">Vos zones : </span>
@@ -127,6 +150,20 @@ function AgentZones() {
           <span className="text-muted-foreground">Aucune zone assignée</span>
         )}
       </span>
+      <button
+        type="button"
+        onClick={onClear}
+        className="shrink-0 rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+        aria-label="Voir toutes les offres, hors de vos zones"
+        title="Voir toutes les offres"
+      >
+        <IconX className="size-4" />
+      </button>
     </div>
   );
+}
+
+function heroTitle(isAuthenticated: boolean, zoneFeed: boolean): string {
+  if (zoneFeed) return "Les offres de votre zone";
+  return isAuthenticated ? "Toutes les offres ouvertes" : "Trouvez les offres de votre zone";
 }
