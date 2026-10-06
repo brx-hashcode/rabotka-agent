@@ -1,6 +1,12 @@
 import { AgentBaseController } from "./base-controller";
 import type {
   AgentCandidate,
+  AgentStats,
+  AgentWallet,
+  AgentWithdrawal,
+  Paginated,
+  PlacementGroup,
+  WithdrawalRequest,
   AgentJob,
   AgentLead,
   AgentSelf,
@@ -78,6 +84,42 @@ class AgentController extends AgentBaseController {
     return this.post(`/agent/leads/${encodeURIComponent(leadId)}/invite`);
   }
 
+  /** My figures for the account page, over the last `days`. */
+  getStats(days: 30 | 90 = 30): Promise<AgentStats> {
+    return this.get(`/agent/stats?days=${days}`);
+  }
+
+  /** Balance, movements (paged), the open withdrawal and the payout rules. */
+  getWallet(page = 1, limit = 20): Promise<AgentWallet> {
+    return this.get(`/agent/wallet?page=${page}&limit=${limit}`);
+  }
+
+  /** Every worker I placed, on any job, newest first. */
+  listAllPlacements(
+    query: { group?: PlacementGroup; page?: number; limit?: number } = {},
+  ): Promise<Paginated<JobPlacement>> {
+    const params = this.buildSearchParams({
+      group: query.group,
+      page: query.page,
+      limit: query.limit,
+    });
+    return this.get(this.createURL("/agent/placements", params));
+  }
+
+  listWithdrawals(page = 1, limit = 20): Promise<Paginated<AgentWithdrawal>> {
+    return this.get(`/agent/withdrawals?page=${page}&limit=${limit}`);
+  }
+
+  /** Locks the amount until an admin pays or rejects it. One open at a time. */
+  requestWithdrawal(body: WithdrawalRequest): Promise<AgentWithdrawal> {
+    return this.post("/agent/withdrawals", body);
+  }
+
+  /** Take back the open request; the amount returns to the available balance. */
+  cancelWithdrawal(id: string): Promise<AgentWithdrawal> {
+    return this.post(`/agent/withdrawals/${encodeURIComponent(id)}/cancel`);
+  }
+
   logCall(leadId: string, outcome: CallOutcome, note?: string): Promise<AgentLead> {
     return this.post(`/agent/leads/${encodeURIComponent(leadId)}/calls`, {
       outcome,
@@ -100,3 +142,9 @@ export const placeLead = controller.placeLead.bind(controller);
 export const getPlacements = controller.getPlacements.bind(controller);
 export const lookupWorker = controller.lookupWorker.bind(controller);
 export const placeByPhone = controller.placeByPhone.bind(controller);
+export const getStats = controller.getStats.bind(controller);
+export const getWallet = controller.getWallet.bind(controller);
+export const listAllPlacements = controller.listAllPlacements.bind(controller);
+export const listWithdrawals = controller.listWithdrawals.bind(controller);
+export const requestWithdrawal = controller.requestWithdrawal.bind(controller);
+export const cancelWithdrawal = controller.cancelWithdrawal.bind(controller);

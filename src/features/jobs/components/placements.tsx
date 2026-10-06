@@ -11,20 +11,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { Button } from "#/components/ui/button";
 import { usePlacements, useRevealPhone } from "#/hooks/use-candidates";
 import { friendlyError } from "#/lib/api/friendly-error";
-import type { ApplicationStatus, JobPlacement, PhoneReveal } from "#/lib/api/types";
+import type { JobPlacement, PhoneReveal } from "#/lib/api/types";
 import { cn, getInitials } from "#/lib/utils";
+import { applicationStatus } from "#/features/jobs/application-status";
 import { ActionDialog } from "./action-dialog";
-
-const STATUS: Record<ApplicationStatus, { label: string; tone: string }> = {
-  PENDING: { label: "En attente", tone: "bg-chip-amber text-chip-amber-foreground" },
-  VIEWED: { label: "Vue par l'employeur", tone: "bg-chip-violet text-chip-violet-foreground" },
-  WAITING_PAYMENT: { label: "Acceptée", tone: "bg-chip-green text-chip-green-foreground" },
-  ACCEPTED: { label: "Acceptée", tone: "bg-chip-green text-chip-green-foreground" },
-  STARTED: { label: "En cours", tone: "bg-chip-green text-chip-green-foreground" },
-  END: { label: "Terminée", tone: "bg-muted text-muted-foreground" },
-  REJECTED: { label: "Refusée", tone: "bg-destructive/10 text-destructive" },
-  CANCELLED: { label: "Annulée", tone: "bg-muted text-muted-foreground" },
-};
 
 /**
  * The workers this agent placed on the job — directly, by invitation or by
@@ -52,7 +42,7 @@ export function Placements({ jobId }: Readonly<{ jobId: string }>) {
 
 function PlacementRow({ placement: p }: Readonly<{ placement: JobPlacement }>) {
   const name = `${p.worker.firstName} ${p.worker.lastName}`.trim();
-  const status = STATUS[p.status] ?? { label: p.status, tone: "bg-muted text-muted-foreground" };
+  const status = applicationStatus(p.status);
   const queryClient = useQueryClient();
   const revealKey = ["reveal", p.leadId] as const;
   // Same cache as the candidate card: showing it again must not log another reveal.

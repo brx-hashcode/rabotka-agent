@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { toInternational } from "./phone";
+import { guessMomoOperator, toInternational } from "./phone";
 
 describe("toInternational", () => {
   it("keeps a number typed with its country code", () => {
@@ -19,5 +19,19 @@ describe("toInternational", () => {
 
   it("falls back to Congo for a country it does not know", () => {
     expect(toInternational("061234567", "ZZ")).toBe("+242061234567");
+  });
+});
+
+describe("guessMomoOperator", () => {
+  it("reads the network from a Congo prefix", () => {
+    expect(guessMomoOperator("+242061234567")).toBe("MTN");
+    expect(guessMomoOperator("+242051234567")).toBe("AIRTEL");
+    expect(guessMomoOperator("+242041234567")).toBe("AIRTEL");
+  });
+
+  it("leaves the choice to the agent otherwise", () => {
+    expect(guessMomoOperator("+242221234567")).toBeNull();
+    expect(guessMomoOperator("+243811234567")).toBeNull();
+    expect(guessMomoOperator(null)).toBeNull();
   });
 });

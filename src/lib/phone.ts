@@ -31,3 +31,16 @@ export function toInternational(raw: string, countryCode: string | null): string
 export function dialCode(countryCode: string | null): string {
   return DIAL_CODES[countryCode?.toUpperCase() ?? "CG"] ?? DIAL_CODES.CG;
 }
+
+/**
+ * The Congo Mobile Money network a number is on, from its prefix: 06 is MTN,
+ * 05 and 04 are Airtel. Null for anything else, so the agent picks.
+ */
+export function guessMomoOperator(e164: string | null | undefined): "MTN" | "AIRTEL" | null {
+  const digits = e164?.replace(/\D/g, "") ?? "";
+  if (!digits.startsWith("242")) return null;
+  const prefix = digits.slice(3, 5);
+  if (prefix === "06") return "MTN";
+  if (prefix === "05" || prefix === "04") return "AIRTEL";
+  return null;
+}

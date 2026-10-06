@@ -185,7 +185,22 @@ export type JobPlacement = {
     avatarUrl: string | null;
     city: string | null;
   };
+  job: { id: string; title: string; city: string | null };
+  /** Decided by the commission sweep after the placement; null until then. */
+  commission: PlacementCommission | null;
 };
+
+export type CommissionStatus = "PENDING" | "AVAILABLE" | "CANCELLED" | "INELIGIBLE";
+
+export type PlacementCommission = {
+  status: CommissionStatus;
+  amount: number;
+  availableAt: string | null;
+  reason: string | null;
+};
+
+/** `GET agent/placements?group=` */
+export type PlacementGroup = "active" | "ended" | "closed";
 
 /** `POST agent/jobs/:id/worker-lookup` — a worker outside the suggestions. */
 export type WorkerLookup = {
@@ -213,4 +228,98 @@ export type LeadInvite = {
   /** Pre-filled wa.me link; only once this agent revealed the worker's number. */
   whatsappUrl: string | null;
   lead: AgentLead;
+};
+
+// ── Account: stats, wallet, withdrawals ─────────────────────────────────────
+
+/** `GET agent/stats` */
+export type AgentStats = {
+  placements: { total: number; thisMonth: number; active: number };
+  pipeline: Record<"claimed" | "invited" | "confirmed" | "declined" | "unreachable", number>;
+  calls: { total: number; last30Days: number };
+  /** Confirmed over every lead worked; null before the first one. */
+  conversion: number | null;
+  earnings: { thisMonth: number; lastMonth: number };
+  days: 30 | 90;
+  timeseries: { date: string; placements: number; earned: number }[];
+};
+
+export type LedgerBucket = "PENDING" | "AVAILABLE" | "LOCKED" | "PAID_OUT";
+
+export type LedgerKind =
+  | "COMMISSION_EARNED"
+  | "COMMISSION_RELEASED"
+  | "COMMISSION_CANCELLED"
+  | "WITHDRAWAL_REQUESTED"
+  | "WITHDRAWAL_PAID"
+  | "WITHDRAWAL_REJECTED"
+  | "WITHDRAWAL_CANCELLED"
+  | "ADJUSTMENT";
+
+export type MomoOperator = "MTN" | "AIRTEL";
+
+export type WithdrawalStatus = "REQUESTED" | "PAID" | "REJECTED" | "CANCELLED";
+
+export type AgentWithdrawal = {
+  id: string;
+  createdAt: string;
+  amount: number;
+  momoPhone: string;
+  momoOperator: MomoOperator;
+  status: WithdrawalStatus;
+  processedAt: string | null;
+  providerReference: string | null;
+  rejectionReason: string | null;
+};
+
+/** One ledger event: its rows grouped back together. */
+export type AgentMovement = {
+  id: string;
+  kind: LedgerKind;
+  at: string;
+  /** Signed amount per bucket, e.g. { PENDING: -400, AVAILABLE: 400 }. */
+  moves: Partial<Record<LedgerBucket, number>>;
+  amount: number;
+  description: string | null;
+  commission: {
+    status: CommissionStatus;
+    reason: string | null;
+    job: { id: string; title: string | null };
+    worker: { id: string; name: string | null };
+  } | null;
+  withdrawal: Pick<
+    AgentWithdrawal,
+    "status" | "momoPhone" | "momoOperator" | "providerReference" | "rejectionReason" | "processedAt"
+  > | null;
+};
+
+export type AgentBalance = {
+  /** Earned, in the confirmation window. */
+  pending: number;
+  available: number;
+  /** Held by the open withdrawal. */
+  locked: number;
+  paidOut: number;
+  totalEarned: number;
+};
+
+export type WalletRules = {
+  withdrawalMinFcfa: number;
+  commissionFcfa: number;
+  releaseEvent: "UNLOCKED" | "COMPLETED";
+  confirmationHours: number;
+};
+
+/** `GET agent/wallet` */
+export type AgentWallet = {
+  balance: AgentBalance;
+  movements: Paginated<AgentMovement>;
+  openWithdrawal: AgentWithdrawal | null;
+  rules: WalletRules;
+};
+
+export type WithdrawalRequest = {
+  amount: number;
+  momoOperator: MomoOperator;
+  momoPhone?: string;
 };

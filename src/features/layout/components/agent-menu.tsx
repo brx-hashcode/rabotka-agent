@@ -1,7 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { IconChevronDown, IconLogout, IconMapPin, IconUser } from "@tabler/icons-react";
+import {
+  IconChevronDown,
+  IconLayoutDashboard,
+  IconLogout,
+  IconMapPin,
+  IconUserCheck,
+  IconWallet,
+} from "@tabler/icons-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import {
@@ -14,7 +21,13 @@ import { useAgentMe } from "#/hooks/use-agent-me";
 import { useLogoutMutation } from "#/hooks/use-auth-mutations";
 import { getInitials } from "#/lib/utils";
 
-/** The signed-in agent in the header: avatar, name, zones, sign-out. */
+const ACCOUNT_LINKS = [
+  { href: "/profile", label: "Mon compte", icon: IconLayoutDashboard },
+  { href: "/profile?tab=portefeuille", label: "Portefeuille", icon: IconWallet },
+  { href: "/profile?tab=placements", label: "Mes placements", icon: IconUserCheck },
+];
+
+/** The signed-in agent in the header: avatar, name, zones, account links, sign-out. */
 export function AgentMenu() {
   const { data: agent } = useAgentMe();
   const logout = useLogoutMutation();
@@ -80,14 +93,20 @@ export function AgentMenu() {
 
         <div aria-hidden className="mx-3 my-1 h-px bg-border/70" />
 
-        <DropdownMenuItem asChild className="cursor-pointer gap-3 rounded-2xl px-3 py-2.5 text-sm focus:bg-page">
-          <Link href="/profile">
-            <span className="flex size-8 items-center justify-center rounded-full bg-page">
-              <IconUser className="size-4" />
-            </span>
-            Mon profil
-          </Link>
-        </DropdownMenuItem>
+        {ACCOUNT_LINKS.map(({ href, label, icon: Icon }) => (
+          <DropdownMenuItem
+            key={href}
+            asChild
+            className="cursor-pointer gap-3 rounded-2xl px-3 py-2.5 text-sm focus:bg-page"
+          >
+            <Link href={href}>
+              <span className="flex size-8 items-center justify-center rounded-full bg-page">
+                <Icon className="size-4" />
+              </span>
+              {label}
+            </Link>
+          </DropdownMenuItem>
+        ))}
 
         <DropdownMenuItem
           onSelect={() => logout.mutate()}
