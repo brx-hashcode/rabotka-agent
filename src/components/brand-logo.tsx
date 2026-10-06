@@ -15,18 +15,18 @@ export function BrandLogo({
   className,
 }: Readonly<{ tone?: "light" | "dark"; className?: string }>) {
   return (
-    <span className={cn("flex items-center gap-2", className)}>
+    <span className={cn("flex items-center gap-1.5", className)}>
       <Image
         src="/rabotka-logo.png"
         alt="Logo Rabotka"
-        width={40}
-        height={40}
+        width={36}
+        height={36}
         unoptimized
         priority
-        className="size-10 object-contain"
+        className="size-9 object-contain"
       />
       <span className="flex flex-col leading-none">
-        <span className="font-bold font-display text-xl">Rabotka</span>
+        <span className="font-bold font-display text-lg leading-[1.05]">Rabotka</span>
         <span
           className={cn(
             "text-[10px] leading-none",
