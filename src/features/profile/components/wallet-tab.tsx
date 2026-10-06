@@ -12,7 +12,6 @@ import {
   IconHourglass,
   IconInfoCircle,
   IconReceipt,
-  IconX,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 
@@ -61,7 +60,6 @@ export function WalletTab() {
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
       <div className="flex min-w-0 flex-col gap-6">
         <BalanceCard wallet={w} onWithdraw={() => setWithdrawing(true)} />
-        {w.openWithdrawal && <OpenWithdrawal withdrawal={w.openWithdrawal} />}
         <Movements movements={wallet.movements} />
       </div>
       <aside className="flex min-w-0 flex-col gap-6">
@@ -83,11 +81,7 @@ function BalanceCard({
   wallet: { balance, rules, openWithdrawal },
   onWithdraw,
 }: Readonly<{ wallet: AgentWallet; onWithdraw: () => void }>) {
-  const blocker = openWithdrawal
-    ? "Une demande de retrait est déjà en attente."
-    : balance.available < rules.withdrawalMinFcfa
-      ? `Retrait possible à partir de ${formatXAF(rules.withdrawalMinFcfa)}.`
-      : null;
+  const belowMin = balance.available < rules.withdrawalMinFcfa;
 
   return (
     <section className="flex flex-col gap-6 rounded-3xl bg-header p-5 text-header-foreground sm:p-7">
@@ -99,18 +93,27 @@ function BalanceCard({
           </p>
           <p className="text-header-muted text-xs">Total gagné : {formatXAF(balance.totalEarned)}</p>
         </div>
-        <div className="flex flex-col items-stretch gap-1.5 sm:items-end">
-          <Button
-            size="lg"
-            className="w-full rounded-full px-6 sm:w-auto"
-            onClick={onWithdraw}
-            disabled={!!blocker}
-          >
-            <IconCash />
-            Demander un retrait
-          </Button>
-          {blocker && <p className="text-header-muted text-xs">{blocker}</p>}
-        </div>
+        {/* One request at a time: while one waits, it takes the button's place. */}
+        {openWithdrawal ? (
+          <PendingRequest withdrawal={openWithdrawal} />
+        ) : (
+          <div className="flex flex-col items-stretch gap-1.5 sm:items-end">
+            <Button
+              size="lg"
+              className="w-full rounded-full px-6 sm:w-auto"
+              onClick={onWithdraw}
+              disabled={belowMin}
+            >
+              <IconCash />
+              Demander un retrait
+            </Button>
+            {belowMin && (
+              <p className="text-header-muted text-xs">
+                Retrait possible à partir de {formatXAF(rules.withdrawalMinFcfa)}.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       <dl className="grid gap-2 sm:grid-cols-3">
@@ -135,32 +138,32 @@ function BalanceCard({
   );
 }
 
-function OpenWithdrawal({ withdrawal: w }: Readonly<{ withdrawal: AgentWithdrawal }>) {
+/** The request waiting for an admin, inside the balance card, with a way to take it back. */
+function PendingRequest({ withdrawal: w }: Readonly<{ withdrawal: AgentWithdrawal }>) {
   const [confirming, setConfirming] = useState(false);
   const cancel = useCancelWithdrawal();
 
   return (
-    <section className="flex flex-col gap-3 rounded-2xl bg-chip-amber p-4 text-chip-amber-foreground sm:flex-row sm:items-center sm:p-5">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/60">
-        <IconClockHour4 className="size-5" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="font-semibold">
-          Retrait de {formatXAF(w.amount)} en attente
-        </p>
-        <p className="text-sm opacity-80">
-          {OPERATOR_LABELS[w.momoOperator]} · {w.momoPhone} · demandé le{" "}
-          {format(new Date(w.createdAt), "d MMM 'à' HH'h'mm", { locale: fr })}
-        </p>
+    <div className="flex w-full flex-col gap-2 rounded-2xl bg-white/60 p-4 sm:w-80 dark:bg-black/20">
+      <div className="flex items-center justify-between gap-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-chip-amber px-2.5 py-1 font-medium text-chip-amber-foreground text-xs">
+          <IconClockHour4 className="size-3.5" />
+          Retrait en attente
+        </span>
+        <button
+          type="button"
+          onClick={() => setConfirming(true)}
+          className="rounded-full px-2 py-1 font-medium text-header-muted text-xs transition-colors hover:bg-white/70 hover:text-header-foreground"
+        >
+          Annuler
+        </button>
       </div>
-      <Button
-        variant="secondary"
-        className="self-start rounded-full bg-white/70 text-chip-amber-foreground hover:bg-white sm:self-auto"
-        onClick={() => setConfirming(true)}
-      >
-        <IconX />
-        Annuler la demande
-      </Button>
+      <p className="font-semibold text-2xl tabular-nums tracking-tight">{formatXAF(w.amount)}</p>
+      <p className="text-header-muted text-xs leading-relaxed">
+        Vers {OPERATOR_LABELS[w.momoOperator]} {w.momoPhone}
+        <br />
+        Demandé le {format(new Date(w.createdAt), "d MMM 'à' HH'h'mm", { locale: fr })}
+      </p>
 
       <ActionDialog
         open={confirming}
@@ -184,7 +187,7 @@ function OpenWithdrawal({ withdrawal: w }: Readonly<{ withdrawal: AgentWithdrawa
           })
         }
       />
-    </section>
+    </div>
   );
 }
 
