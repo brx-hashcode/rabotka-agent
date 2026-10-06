@@ -36,7 +36,7 @@ export function AccountPage() {
 
   if (me.isError) {
     return (
-      <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
+      <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
         <div className="rounded-3xl bg-card p-8 text-center text-muted-foreground text-sm">
           {friendlyError(me.error, "Impossible de charger votre compte.")}
         </div>
@@ -48,7 +48,7 @@ export function AccountPage() {
   const name = agent ? `${agent.firstName} ${agent.lastName}`.trim() : "";
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-8">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <div className="flex min-w-0 flex-1 items-center gap-4">
           <Avatar className="size-16 shrink-0 sm:size-20">
