@@ -26,22 +26,19 @@ export function useAgentStats(days: 30 | 90) {
   });
 }
 
-/**
- * Balance and rules come with every page of movements; the first page's are
- * the ones shown.
- */
+/** How many of the latest movements the wallet shows. */
+const LATEST_MOVEMENTS = 10;
+
+/** Balance, rules, the open withdrawal, and the latest movements. */
 export function useWallet() {
-  const query = useInfiniteQuery({
+  const query = useQuery({
     queryKey: [...accountKey, "wallet"],
-    queryFn: ({ pageParam }) => getWallet(pageParam, PAGE_SIZE),
-    initialPageParam: 1,
-    getNextPageParam: (last) => nextPage(last.movements),
+    queryFn: () => getWallet(1, LATEST_MOVEMENTS),
   });
-  const first = query.data?.pages[0];
   return {
     ...query,
-    wallet: first,
-    movements: query.data?.pages.flatMap((p) => p.movements.data) ?? [],
+    wallet: query.data,
+    movements: query.data?.movements.data ?? [],
   };
 }
 

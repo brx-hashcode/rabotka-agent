@@ -62,12 +62,7 @@ export function WalletTab() {
       <div className="flex min-w-0 flex-col gap-6">
         <BalanceCard wallet={w} onWithdraw={() => setWithdrawing(true)} />
         {w.openWithdrawal && <OpenWithdrawal withdrawal={w.openWithdrawal} />}
-        <Movements
-          movements={wallet.movements}
-          hasMore={!!wallet.hasNextPage}
-          loadingMore={wallet.isFetchingNextPage}
-          onMore={() => void wallet.fetchNextPage()}
-        />
+        <Movements movements={wallet.movements} />
       </div>
       <aside className="flex min-w-0 flex-col gap-6">
         <Rules wallet={w} />
@@ -229,12 +224,8 @@ const TONE_STYLES: Record<MovementTone, { icon: string; amount: string; sign: st
   neutral: { icon: "bg-page text-muted-foreground", amount: "text-foreground", sign: "" },
 };
 
-function Movements({
-  movements,
-  hasMore,
-  loadingMore,
-  onMore,
-}: Readonly<{ movements: AgentMovement[]; hasMore: boolean; loadingMore: boolean; onMore: () => void }>) {
+/** The latest movements, by day. */
+function Movements({ movements }: Readonly<{ movements: AgentMovement[] }>) {
   return (
     <section className="flex flex-col gap-3">
       <h2 className="font-semibold text-lg">Mouvements</h2>
@@ -259,16 +250,6 @@ function Movements({
             );
           })}
         </div>
-      )}
-      {hasMore && (
-        <Button
-          variant="secondary"
-          className="self-center rounded-full bg-card"
-          onClick={onMore}
-          disabled={loadingMore}
-        >
-          {loadingMore ? "Chargement…" : "Voir plus"}
-        </Button>
       )}
     </section>
   );
