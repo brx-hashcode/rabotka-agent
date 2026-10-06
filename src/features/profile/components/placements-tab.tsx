@@ -34,7 +34,7 @@ export function PlacementsTab() {
               "shrink-0 rounded-full px-3.5 py-1.5 font-medium text-sm transition-colors",
               group === f.value
                 ? "bg-chip-green text-chip-green-foreground"
-                : "bg-card text-muted-foreground shadow-soft hover:text-foreground",
+                : "bg-card text-muted-foreground hover:text-foreground",
             )}
           >
             {f.label}
@@ -52,11 +52,11 @@ export function PlacementsTab() {
           ))}
         </div>
       ) : list.isError ? (
-        <p className="rounded-2xl bg-card p-6 text-center text-muted-foreground text-sm shadow-soft">
+        <p className="rounded-2xl bg-card p-6 text-center text-muted-foreground text-sm">
           {friendlyError(list.error, "Impossible de charger vos placements.")}
         </p>
       ) : list.placements.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-2xl bg-card px-5 py-10 text-center shadow-soft">
+        <div className="flex flex-col items-center gap-3 rounded-2xl bg-card px-5 py-10 text-center">
           <p className="text-muted-foreground text-sm">
             {group ? "Aucun placement dans cette catégorie." : "Vous n'avez encore placé personne."}
           </p>
@@ -70,7 +70,7 @@ export function PlacementsTab() {
         <>
           <div
             className={cn(
-              "flex flex-col divide-y divide-border/60 rounded-2xl bg-card shadow-soft transition-opacity",
+              "flex flex-col divide-y divide-border/60 rounded-2xl bg-card transition-opacity",
               list.isPlaceholderData && "opacity-60",
             )}
           >
@@ -81,7 +81,7 @@ export function PlacementsTab() {
           {list.hasNextPage && (
             <Button
               variant="secondary"
-              className="self-center rounded-full bg-card shadow-soft"
+              className="self-center rounded-full bg-card"
               onClick={() => void list.fetchNextPage()}
               disabled={list.isFetchingNextPage}
             >

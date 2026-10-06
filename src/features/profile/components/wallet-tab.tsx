@@ -42,7 +42,7 @@ export function WalletTab() {
 
   if (wallet.isError) {
     return (
-      <p className="rounded-3xl bg-card p-8 text-center text-muted-foreground text-sm shadow-soft">
+      <p className="rounded-3xl bg-card p-8 text-center text-muted-foreground text-sm">
         {friendlyError(wallet.error, "Impossible de charger votre portefeuille.")}
       </p>
     );
@@ -199,7 +199,7 @@ function Rules({ wallet: { rules } }: Readonly<{ wallet: AgentWallet }>) {
       ? "la fin de la mission"
       : "le déblocage du contact par l'employeur";
   return (
-    <section className="flex flex-col gap-3 rounded-3xl bg-card p-5 text-sm shadow-soft">
+    <section className="flex flex-col gap-3 rounded-3xl bg-card p-5 text-sm">
       <h2 className="flex items-center gap-2 font-semibold">
         <IconInfoCircle className="size-4 text-muted-foreground" />
         Comment vous êtes payé
@@ -239,11 +239,11 @@ function Movements({
     <section className="flex flex-col gap-3">
       <h2 className="font-semibold text-lg">Mouvements</h2>
       {movements.length === 0 ? (
-        <p className="rounded-2xl bg-card px-5 py-6 text-center text-muted-foreground text-sm shadow-soft">
+        <p className="rounded-2xl bg-card px-5 py-6 text-center text-muted-foreground text-sm">
           Aucun mouvement pour l&apos;instant. Vos commissions apparaîtront ici.
         </p>
       ) : (
-        <div className="flex flex-col rounded-2xl bg-card shadow-soft">
+        <div className="flex flex-col rounded-2xl bg-card">
           {movements.map((m, i) => {
             const day = new Date(m.at);
             const newDay = i === 0 || !isSameDay(day, new Date(movements[i - 1].at));
@@ -263,7 +263,7 @@ function Movements({
       {hasMore && (
         <Button
           variant="secondary"
-          className="self-center rounded-full bg-card shadow-soft"
+          className="self-center rounded-full bg-card"
           onClick={onMore}
           disabled={loadingMore}
         >
@@ -334,11 +334,11 @@ function WithdrawalHistory() {
       {list.isPending ? (
         <div className="h-40 animate-pulse rounded-2xl bg-card" />
       ) : list.withdrawals.length === 0 ? (
-        <p className="rounded-2xl bg-card px-5 py-6 text-center text-muted-foreground text-sm shadow-soft">
+        <p className="rounded-2xl bg-card px-5 py-6 text-center text-muted-foreground text-sm">
           Aucun retrait demandé.
         </p>
       ) : (
-        <div className="flex flex-col divide-y divide-border/60 rounded-2xl bg-card shadow-soft">
+        <div className="flex flex-col divide-y divide-border/60 rounded-2xl bg-card">
           {list.withdrawals.map((w) => {
             const status = WITHDRAWAL_STATUS[w.status];
             const note =

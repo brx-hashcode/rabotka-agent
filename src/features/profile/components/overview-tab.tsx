@@ -27,7 +27,7 @@ export function OverviewTab({ onOpen }: Readonly<{ onOpen: (tab: AccountTab) => 
 
   if (stats.isError) {
     return (
-      <p className="rounded-3xl bg-card p-8 text-center text-muted-foreground text-sm shadow-soft">
+      <p className="rounded-3xl bg-card p-8 text-center text-muted-foreground text-sm">
         {friendlyError(stats.error, "Impossible de charger vos statistiques.")}
       </p>
     );
@@ -71,7 +71,7 @@ export function OverviewTab({ onOpen }: Readonly<{ onOpen: (tab: AccountTab) => 
         )}
       </div>
 
-      <section className="flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-soft sm:p-6">
+      <section className="flex flex-col gap-4 rounded-3xl bg-card p-5 sm:p-6">
         <div className="flex items-center justify-between gap-3">
           <div>
             <h2 className="font-semibold">Activité</h2>
@@ -85,7 +85,7 @@ export function OverviewTab({ onOpen }: Readonly<{ onOpen: (tab: AccountTab) => 
                 onClick={() => setDays(d)}
                 className={cn(
                   "rounded-full px-3 py-1 font-medium text-xs transition-colors",
-                  days === d ? "bg-card text-foreground shadow-soft" : "text-muted-foreground",
+                  days === d ? "bg-card text-foreground" : "text-muted-foreground",
                 )}
               >
                 {d} j
@@ -115,11 +115,11 @@ export function OverviewTab({ onOpen }: Readonly<{ onOpen: (tab: AccountTab) => 
         {latest.isPending ? (
           <div className="h-40 animate-pulse rounded-2xl bg-card" />
         ) : latest.placements.length === 0 ? (
-          <p className="rounded-2xl bg-card px-5 py-6 text-center text-muted-foreground text-sm shadow-soft">
+          <p className="rounded-2xl bg-card px-5 py-6 text-center text-muted-foreground text-sm">
             Pas encore de placement. Ouvrez une offre de vos zones pour mobiliser des travailleurs.
           </p>
         ) : (
-          <div className="flex flex-col divide-y divide-border/60 rounded-2xl bg-card shadow-soft">
+          <div className="flex flex-col divide-y divide-border/60 rounded-2xl bg-card">
             {latest.placements.slice(0, 3).map((p) => (
               <PlacementItem key={p.applicationId} placement={p} />
             ))}
@@ -137,7 +137,7 @@ function StatCard({
   hint,
 }: Readonly<{ icon: Icon; label: string; value: string; hint: string }>) {
   return (
-    <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-soft sm:p-5">
+    <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 sm:p-5">
       <span className="flex size-9 items-center justify-center rounded-xl bg-page text-muted-foreground">
         <Icon className="size-[18px]" />
       </span>
@@ -197,7 +197,7 @@ function Pipeline({ pipeline }: Readonly<{ pipeline: AgentStats["pipeline"] }>) 
     { label: "Placés", value: pipeline.confirmed, tone: "bg-chip-green text-chip-green-foreground" },
   ];
   return (
-    <section className="flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-soft sm:p-6">
+    <section className="flex flex-col gap-4 rounded-3xl bg-card p-5 sm:p-6">
       <div>
         <h2 className="font-semibold">Vos travailleurs</h2>
         <p className="text-muted-foreground text-xs">Où en sont ceux que vous avez pris en charge</p>

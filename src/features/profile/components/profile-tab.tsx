@@ -24,7 +24,7 @@ export function ProfileTab() {
   const agent = me.data;
 
   return (
-    <div className="flex max-w-2xl flex-col gap-6 rounded-3xl bg-card p-5 shadow-soft sm:p-8">
+    <div className="flex max-w-2xl flex-col gap-6 rounded-3xl bg-card p-5 sm:p-8">
       <section className="space-y-2">
         <h2 className="font-semibold text-sm">Coordonnées</h2>
         <dl className="divide-y divide-card overflow-hidden rounded-2xl bg-page">

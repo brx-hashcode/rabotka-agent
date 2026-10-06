@@ -111,7 +111,7 @@ export function WithdrawDialog({
             <button
               type="button"
               onClick={() => setAmount(String(Math.floor(available)))}
-              className="rounded-full bg-card px-3 py-1 font-medium text-xs shadow-soft"
+              className="rounded-full bg-card px-3 py-1 font-medium text-xs"
             >
               Tout
             </button>

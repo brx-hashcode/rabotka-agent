@@ -39,7 +39,7 @@ export function AccountPage() {
   if (me.isError) {
     return (
       <div className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6">
-        <div className="rounded-3xl bg-card p-8 text-center text-muted-foreground text-sm shadow-soft">
+        <div className="rounded-3xl bg-card p-8 text-center text-muted-foreground text-sm">
           {friendlyError(me.error, "Impossible de charger votre compte.")}
         </div>
       </div>
@@ -84,7 +84,7 @@ export function AccountPage() {
           type="button"
           onClick={() => void setTab("portefeuille")}
           className={cn(
-            "flex items-center gap-3 rounded-2xl bg-card px-4 py-3 text-left shadow-soft transition-colors hover:bg-card/80",
+            "flex items-center gap-3 rounded-2xl bg-card px-4 py-3 text-left transition-colors hover:bg-card/80",
             // The wallet tab shows the balance in full already.
             tab === "portefeuille" && "max-sm:hidden",
           )}
