@@ -18,7 +18,12 @@ import { toast } from "sonner";
 
 import { Button } from "#/components/ui/button";
 import { ActionDialog } from "#/features/jobs/components/action-dialog";
-import { useCancelWithdrawal, useWallet, useWithdrawals } from "#/hooks/use-account";
+import {
+  useCancelWithdrawal,
+  useWallet,
+  useWithdrawalOutcome,
+  useWithdrawals,
+} from "#/hooks/use-account";
 import { friendlyError } from "#/lib/api/friendly-error";
 import type {
   AgentMovement,
@@ -39,6 +44,8 @@ import { WithdrawDialog } from "./withdraw-dialog";
 export function WalletTab() {
   const wallet = useWallet();
   const [withdrawing, setWithdrawing] = useState(false);
+  // undefined while loading, so the first load is not read as a decision.
+  useWithdrawalOutcome(wallet.wallet ? (wallet.wallet.openWithdrawal?.id ?? null) : undefined);
 
   if (wallet.isError) {
     return (

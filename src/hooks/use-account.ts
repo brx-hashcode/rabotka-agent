@@ -1,4 +1,6 @@
+import { useEffect, useRef } from "react";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 import {
   cancelWithdrawal,
@@ -9,6 +11,7 @@ import {
   requestWithdrawal,
 } from "#/lib/api/agent-controller";
 import type { PlacementGroup, WithdrawalRequest } from "#/lib/api/types";
+import { formatXAF } from "#/lib/utils";
 
 const PAGE_SIZE = 20;
 
@@ -29,17 +32,61 @@ export function useAgentStats(days: 30 | 90) {
 /** How many of the latest movements the wallet shows. */
 const LATEST_MOVEMENTS = 10;
 
-/** Balance, rules, the open withdrawal, and the latest movements. */
+/** How often the wallet checks back while a withdrawal waits for an admin. */
+const PENDING_POLL_MS = 15_000;
+
+/**
+ * Balance, rules, the open withdrawal, and the latest movements. Always
+ * refetched on focus; polled while a withdrawal is pending, so an admin's
+ * payment or refusal shows without a reload. (No agent websocket: the session
+ * is an httpOnly cookie the browser cannot hand to a socket.)
+ */
 export function useWallet() {
   const query = useQuery({
     queryKey: [...accountKey, "wallet"],
     queryFn: () => getWallet(1, LATEST_MOVEMENTS),
+    staleTime: 0,
+    refetchInterval: (q) => (q.state.data?.openWithdrawal ? PENDING_POLL_MS : false),
   });
   return {
     ...query,
     wallet: query.data,
     movements: query.data?.movements.data ?? [],
   };
+}
+
+/**
+ * Tells the agent when the withdrawal they were waiting on is decided: the
+ * open request disappears from the wallet, so the rest of the account is
+ * refreshed and its outcome looked up. Their own cancellation already says
+ * so itself.
+ */
+export function useWithdrawalOutcome(openId: string | null | undefined) {
+  const queryClient = useQueryClient();
+  const previous = useRef(openId);
+
+  useEffect(() => {
+    const was = previous.current;
+    previous.current = openId;
+    if (!was || openId === was || openId === undefined) return;
+
+    void queryClient.invalidateQueries({ queryKey: accountKey });
+    void listWithdrawals(1, 10).then(({ data }) => {
+      const decided = data.find((w) => w.id === was);
+      if (decided?.status === "PAID") {
+        toast.success(
+          `Votre retrait de ${formatXAF(decided.amount)} a été versé` +
+            (decided.providerReference ? ` (réf. ${decided.providerReference}).` : "."),
+        );
+      } else if (decided?.status === "REJECTED") {
+        toast.error(
+          `Votre retrait de ${formatXAF(decided.amount)} a été refusé` +
+            (decided.rejectionReason ? ` : ${decided.rejectionReason}` : ".") +
+            " Le montant est de nouveau disponible.",
+        );
+      }
+    });
+  }, [openId, queryClient]);
 }
 
 export function useAccountPlacements(group: PlacementGroup | null) {
@@ -61,6 +108,7 @@ export function useAccountPlacements(group: PlacementGroup | null) {
 export function useWithdrawals() {
   const query = useInfiniteQuery({
     queryKey: [...accountKey, "withdrawals"],
+    staleTime: 0,
     queryFn: ({ pageParam }) => listWithdrawals(pageParam, 10),
     initialPageParam: 1,
     getNextPageParam: nextPage,
