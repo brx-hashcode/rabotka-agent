@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 import {
   cancelWithdrawal,
@@ -11,7 +10,6 @@ import {
   requestWithdrawal,
 } from "#/lib/api/agent-controller";
 import type { PlacementGroup, WithdrawalRequest } from "#/lib/api/types";
-import { formatXAF } from "#/lib/utils";
 
 const PAGE_SIZE = 20;
 
@@ -56,10 +54,9 @@ export function useWallet() {
 }
 
 /**
- * Tells the agent when the withdrawal they were waiting on is decided: the
- * open request disappears from the wallet, so the rest of the account is
- * refreshed and its outcome looked up. Their own cancellation already says
- * so itself.
+ * When the withdrawal the agent was waiting on is decided, the open request
+ * disappears from the wallet: refresh the rest of the account (history,
+ * stats). The agent is told by the notification itself (use-notifications).
  */
 export function useWithdrawalOutcome(openId: string | null | undefined) {
   const queryClient = useQueryClient();
@@ -69,23 +66,7 @@ export function useWithdrawalOutcome(openId: string | null | undefined) {
     const was = previous.current;
     previous.current = openId;
     if (!was || openId === was || openId === undefined) return;
-
     void queryClient.invalidateQueries({ queryKey: accountKey });
-    void listWithdrawals(1, 10).then(({ data }) => {
-      const decided = data.find((w) => w.id === was);
-      if (decided?.status === "PAID") {
-        toast.success(
-          `Votre retrait de ${formatXAF(decided.amount)} a été versé` +
-            (decided.providerReference ? ` (réf. ${decided.providerReference}).` : "."),
-        );
-      } else if (decided?.status === "REJECTED") {
-        toast.error(
-          `Votre retrait de ${formatXAF(decided.amount)} a été refusé` +
-            (decided.rejectionReason ? ` : ${decided.rejectionReason}` : ".") +
-            " Le montant est de nouveau disponible.",
-        );
-      }
-    });
   }, [openId, queryClient]);
 }
 

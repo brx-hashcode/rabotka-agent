@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  IconBellRinging,
   IconInfoCircle,
   IconLogout,
   IconMail,
@@ -14,6 +15,7 @@ import {
 import { Button } from "#/components/ui/button";
 import { LogoutDialog } from "#/features/layout/components/logout-dialog";
 import { useAgentMe } from "#/hooks/use-agent-me";
+import { usePush } from "#/hooks/use-push";
 import { cn } from "#/lib/utils";
 
 const STATUS: Record<string, { label: string; tone: string }> = {
@@ -100,6 +102,8 @@ export function ProfileTab() {
         </div>
       </section>
 
+      <PushCard />
+
       <section className="flex flex-col gap-3 rounded-3xl bg-card p-5 sm:flex-row sm:items-center sm:p-6 lg:col-span-2">
         <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-page text-muted-foreground">
           <IconLogout className="size-5" />
@@ -144,5 +148,45 @@ function Row({
       <dt className="text-muted-foreground">{label}</dt>
       <dd className="ml-auto flex min-w-0 justify-end font-medium">{children}</dd>
     </div>
+  );
+}
+
+const PUSH_COPY: Record<string, string> = {
+  on: "Activées sur cet appareil : vous êtes prévenu(e) même quand l'application est fermée.",
+  off: "Recevez commissions, retraits, placements et nouvelles offres même quand l'application est fermée.",
+  denied:
+    "Bloquées pour ce site. Autorisez les notifications dans les réglages du navigateur, puis revenez ici.",
+  "needs-install":
+    "Sur iPhone, ajoutez Rabotka à l'écran d'accueil (Partager → « Sur l'écran d'accueil ») et ouvrez-le depuis là pour les activer.",
+  unsupported: "Ce navigateur ne permet pas les notifications.",
+};
+
+/** Web Push on this device: on, off, or why it is not possible. */
+function PushCard() {
+  const push = usePush();
+  const canToggle = push.state === "on" || push.state === "off";
+
+  return (
+    <section className="flex flex-col gap-3 rounded-3xl bg-card p-5 sm:flex-row sm:items-center sm:p-6 lg:col-span-2">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-page text-muted-foreground">
+        <IconBellRinging className="size-5" />
+      </span>
+      <div className="min-w-0 flex-1 space-y-1">
+        <p className="font-semibold">Notifications sur cet appareil</p>
+        <p className="text-muted-foreground text-sm">
+          {push.state ? PUSH_COPY[push.state] : "…"}
+        </p>
+      </div>
+      {canToggle && (
+        <Button
+          variant={push.state === "on" ? "secondary" : "default"}
+          className="rounded-full"
+          disabled={push.pending}
+          onClick={() => void (push.state === "on" ? push.disable() : push.enable())}
+        >
+          {push.state === "on" ? "Désactiver" : "Activer"}
+        </Button>
+      )}
+    </section>
   );
 }

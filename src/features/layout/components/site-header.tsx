@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { BrandLogo } from "#/components/brand-logo";
 import { Button } from "#/components/ui/button";
 import { useSession } from "#/app/providers/session-context";
+import { NotificationBell } from "#/features/notifications/components/notification-bell";
 import { AgentMenu } from "./agent-menu";
 
 /**
@@ -30,7 +31,10 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-3">
           {isAuthenticated ? (
-            <AgentMenu />
+            <>
+              <NotificationBell />
+              <AgentMenu />
+            </>
           ) : (
             <Button
               variant="ghost"

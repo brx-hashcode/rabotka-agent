@@ -321,11 +321,11 @@ function MyLead({
   else step = "reveal";
   let primary: Action;
   if (step === "place") {
-    primary = { label: `Placer ${workerName} sur l'offre`, icon: IconUserPlus, onClick: () => setDialog("place") };
+    primary = { label: "Placer sur l'offre", icon: IconUserPlus, onClick: () => setDialog("place") };
   } else if (step === "call") {
     primary = { label: "Résultat de l'appel", icon: IconClipboardCheck, onClick: openCall };
   } else {
-    primary = { label: `Voir le numéro de ${workerName}`, icon: IconPhone, onClick: () => setDialog("reveal") };
+    primary = { label: "Voir le numéro", icon: IconPhone, onClick: () => setDialog("reveal") };
   }
   const secondary = [
     !revealed && step !== "reveal" && {
@@ -458,7 +458,7 @@ function MyLead({
         icon={<IconUserPlus className="size-5" />}
         title={`Placer ${workerName} sur l'offre ?`}
         description={`Une candidature est créée au nom de ${workerName} pour cette offre, et le placement vous est attribué. ${workerName} en est informé(e) par WhatsApp.`}
-        confirmLabel={`Placer ${workerName}`}
+        confirmLabel="Placer"
         pending={place.isPending}
         onConfirm={() =>
           place.mutate(lead.id, {
