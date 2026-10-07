@@ -104,7 +104,7 @@ export function OffListPlacement({
             ? `Une candidature est créée au nom de ${name} pour cette offre, et le placement vous est attribué. ${name} en est informé(e) par WhatsApp.`
             : "Saisissez le numéro WhatsApp que le travailleur vous a donné. Rabotka retrouve son profil."
         }
-        confirmLabel={found ? `Placer ${name}` : "Rechercher"}
+        confirmLabel={found ? "Placer" : "Rechercher"}
         pending={lookup.isPending || place.isPending}
         confirmDisabled={found ? !!found.blocker || !agreed : !validNumber}
         onConfirm={found ? confirmPlace : search}
