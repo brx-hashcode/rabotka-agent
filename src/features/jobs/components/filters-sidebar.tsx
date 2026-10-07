@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { IconSearch, IconX } from "@tabler/icons-react";
 
 import { Checkbox } from "#/components/ui/checkbox";
 import { Slider } from "#/components/ui/slider";
@@ -72,29 +73,13 @@ export function FiltersSidebar({
       )}
 
       <FilterGroup title="Catégories">
-        {/* Scrolls inside its own box rather than stretching the page. */}
-        <div className="-mr-2 flex max-h-72 flex-col gap-2.5 overflow-y-auto overscroll-contain pr-2">
-          {categories.isPending &&
-            Array.from({ length: 5 }, (_, i) => (
-              <div key={i} className="h-5 animate-pulse rounded bg-muted" />
-            ))}
-          {sortedCategories.map((c) => (
-            <CheckRow
-              key={c.id}
-              label={
-                <>
-                  <span aria-hidden className="mr-1.5">
-                    {c.icon ?? "💼"}
-                  </span>
-                  {c.name}
-                </>
-              }
-              count={facets ? (facets.category[c.slug] ?? 0) : undefined}
-              checked={f.categories.includes(c.slug)}
-              onChange={() => void setFilters({ categories: toggle(f.categories, c.slug) })}
-            />
-          ))}
-        </div>
+        <CategoryPicker
+          categories={sortedCategories}
+          pending={categories.isPending}
+          counts={facets?.category}
+          selected={f.categories}
+          onToggle={(slug) => void setFilters({ categories: toggle(f.categories, slug) })}
+        />
       </FilterGroup>
     </div>
   );
@@ -176,5 +161,120 @@ function PayRange({ bounds }: Readonly<{ bounds: { min: number; max: number } }>
         <span>{formatXAF(shown[1])}</span>
       </div>
     </FilterGroup>
+  );
+}
+
+/** Rows shown before "Voir toutes", busiest first. */
+const TOP_CATEGORIES = 6;
+
+/** Lowercased, accents removed: "maçon" finds "Maçonnerie". */
+const fold = (text: string) =>
+  text.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+
+type PickerCategory = { id: string; slug: string; name: string; icon?: string | null };
+
+/**
+ * The category filter, as the client app does it: a search field rather than
+ * one long list. Ticked categories stay on top as chips; untouched, the list
+ * shows the busiest few and opens to all on demand. No inner scroll box — the
+ * sheet (phone) or the column (desktop) scrolls as a whole.
+ */
+function CategoryPicker({
+  categories,
+  pending,
+  counts,
+  selected,
+  onToggle,
+}: Readonly<{
+  categories: PickerCategory[];
+  pending: boolean;
+  counts: Record<string, number> | undefined;
+  selected: string[];
+  onToggle: (slug: string) => void;
+}>) {
+  const [query, setQuery] = useState("");
+  const [showAll, setShowAll] = useState(false);
+
+  const q = fold(query.trim());
+  const matches = q ? categories.filter((c) => fold(c.name).includes(q)) : categories;
+  const visible = q || showAll ? matches : matches.slice(0, TOP_CATEGORIES);
+  const chosen = categories.filter((c) => selected.includes(c.slug));
+
+  return (
+    <div className="flex flex-col gap-3">
+      {chosen.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {chosen.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => onToggle(c.slug)}
+              aria-label={`Retirer ${c.name}`}
+              className="inline-flex max-w-full items-center gap-1 rounded-full bg-chip-green py-1 pr-1.5 pl-2.5 font-medium text-chip-green-foreground text-xs"
+            >
+              <span className="truncate">{c.name}</span>
+              <IconX className="size-3.5 shrink-0" />
+            </button>
+          ))}
+        </div>
+      )}
+
+      <label className="flex h-11 items-center gap-2 rounded-2xl bg-page px-3 focus-within:ring-2 focus-within:ring-ink/20">
+        <IconSearch className="size-4 shrink-0 text-muted-foreground" />
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Rechercher une catégorie"
+          aria-label="Rechercher une catégorie"
+          className="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            aria-label="Effacer la recherche"
+            className="flex size-6 items-center justify-center rounded-full text-muted-foreground hover:bg-card"
+          >
+            <IconX className="size-3.5" />
+          </button>
+        )}
+      </label>
+
+      <div className="flex flex-col gap-2.5">
+        {pending &&
+          Array.from({ length: 5 }, (_, i) => (
+            <div key={i} className="h-5 animate-pulse rounded bg-muted" />
+          ))}
+        {visible.map((c) => (
+          <CheckRow
+            key={c.id}
+            label={
+              <>
+                <span aria-hidden className="mr-1.5">
+                  {c.icon ?? "💼"}
+                </span>
+                {c.name}
+              </>
+            }
+            count={counts ? (counts[c.slug] ?? 0) : undefined}
+            checked={selected.includes(c.slug)}
+            onChange={() => onToggle(c.slug)}
+          />
+        ))}
+        {q && matches.length === 0 && (
+          <p className="text-muted-foreground text-sm">Aucune catégorie pour « {query.trim()} ».</p>
+        )}
+      </div>
+
+      {!q && !pending && matches.length > TOP_CATEGORIES && (
+        <button
+          type="button"
+          onClick={() => setShowAll((v) => !v)}
+          className="self-start font-medium text-sm text-whatsapp-dark hover:underline"
+        >
+          {showAll ? "Voir moins" : `Voir toutes les catégories (${matches.length})`}
+        </button>
+      )}
+    </div>
   );
 }
