@@ -32,14 +32,26 @@ async function postSession<T>(
   return data as T;
 }
 
+/**
+ * Set by a deliberate sign-out. The screens still mounted then refetch, get
+ * 401s, fail to refresh — and without this the "session expired" handler
+ * opened the sign-in dialog right after the agent chose to leave. A new
+ * sign-in clears it.
+ */
+let signedOut = false;
+
 export function verifySession(input: {
   email: string;
   otp: string;
 }): Promise<{ agent: AgentSelf }> {
-  return postSession("/session/verify", input);
+  return postSession<{ agent: AgentSelf }>("/session/verify", input).then((result) => {
+    signedOut = false;
+    return result;
+  });
 }
 
 export function logoutSession(): Promise<{ success: true }> {
+  signedOut = true;
   return postSession("/session/logout");
 }
 
@@ -84,7 +96,7 @@ export async function withSession<T>(
   } catch (error) {
     if (httpStatusOf(error) !== 401) throw error;
     if (!(await refresh())) {
-      onExpired();
+      if (!signedOut) onExpired();
       throw error;
     }
     return call();
