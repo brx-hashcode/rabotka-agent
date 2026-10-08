@@ -45,6 +45,8 @@ export function LocationPicker({
   const cities = useCities(country);
 
   const countryName = countries.data?.find((c) => c.code === value.country)?.name;
+  // The country being browsed in the city step (not necessarily the chosen one).
+  const browsingName = countries.data?.find((c) => c.code === country)?.name ?? country;
   const label = value.city
     ? `${value.city}${countryName ? `, ${countryName}` : ""}`
     : countryName;
@@ -87,7 +89,10 @@ export function LocationPicker({
         sideOffset={18}
         className="w-80 rounded-3xl border-0 bg-card shadow-soft before:hidden"
       >
-        <Command className={COMMAND_STYLE}>
+        {/* Keyed by step: cmdk keeps its search text across children, so the
+            country typed to find "Congo" went on filtering the city list
+            and nothing matched. A new step gets a fresh, empty search. */}
+        <Command key={country ? `cities-${country}` : "countries"} className={COMMAND_STYLE}>
           {country ? (
             <>
               <button
@@ -96,7 +101,9 @@ export function LocationPicker({
                 className="mb-2 flex items-center gap-1 self-start rounded-full px-2 py-1 text-muted-foreground text-xs hover:bg-muted hover:text-foreground"
               >
                 <IconChevronLeft className="size-3.5" />
-                Changer de pays
+                <span className="font-medium text-foreground">{browsingName}</span>
+                <span aria-hidden>·</span>
+                Changer
               </button>
               <CommandInput placeholder="Rechercher une ville" />
               <CommandList className={LIST_STYLE}>
@@ -106,7 +113,10 @@ export function LocationPicker({
                     className={ITEM_STYLE}
                     onSelect={() => pick({ country, city: "" })}
                   >
-                    Tout le pays
+                    <span className="flex min-w-0 flex-col">
+                      <span>Toutes les villes</span>
+                      <span className="truncate text-muted-foreground text-xs">{browsingName}</span>
+                    </span>
                     <Selected on={value.country === country && !value.city} />
                   </CommandItem>
                   {cities.data?.map((city) => (
