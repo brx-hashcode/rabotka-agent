@@ -87,7 +87,10 @@ export function LocationPicker({
         sideOffset={18}
         className="w-80 rounded-3xl border-0 bg-card shadow-soft before:hidden"
       >
-        <Command className={COMMAND_STYLE}>
+        {/* Keyed by step: cmdk keeps its search text across children, so the
+            country typed to find "Congo" went on filtering the city list
+            and nothing matched. A new step gets a fresh, empty search. */}
+        <Command key={country ? `cities-${country}` : "countries"} className={COMMAND_STYLE}>
           {country ? (
             <>
               <button
