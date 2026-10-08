@@ -1,0 +1,199 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState } from "react";
+import { IconFilter, IconMoodEmpty, IconRefresh } from "@tabler/icons-react";
+
+import { Button } from "#/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "#/components/ui/sheet";
+import { useJobCategories } from "#/hooks/use-job-categories";
+import { useFeedFilters, useFeedMode, useJobsFeed } from "#/hooks/use-jobs-feed";
+import { friendlyError } from "#/lib/api/friendly-error";
+import { cn } from "#/lib/utils";
+import { FiltersSidebar, useActiveFilterCount } from "./filters-sidebar";
+import { JobCard, JobCardSkeleton } from "./job-card";
+import { SortSelect } from "./sort-select";
+
+/** The "/" feed below the hero: title row, filter sidebar, card grid. */
+export function JobsFeed() {
+  const { zoneFeed } = useFeedMode();
+  const [filters] = useFeedFilters();
+  const feed = useJobsFeed();
+  const categories = useJobCategories();
+  const activeFilters = useActiveFilterCount();
+
+  const iconBySlug = useMemo(
+    () => new Map(categories.data?.map((c) => [c.slug, c.icon]) ?? []),
+    [categories.data],
+  );
+  const hasFilters = Boolean(
+    filters.q || filters.country || filters.city || activeFilters > 0,
+  );
+
+  // Load the next page as the end of the grid scrolls into view.
+  const sentinel = useRef<HTMLDivElement>(null);
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = feed;
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el || !hasNextPage) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting && !isFetchingNextPage) void fetchNextPage();
+      },
+      { rootMargin: "600px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const inner = usePageScrolledToEnd();
+
+  const sidebar = <FiltersSidebar facets={feed.facets} showPay={zoneFeed} />;
+
+  return (
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:flex lg:h-svh lg:flex-col lg:pb-0">
+      <div className="mb-6 flex shrink-0 flex-wrap items-center justify-between gap-3">
+        <div className="flex items-baseline gap-3">
+          <h2 className="font-semibold text-2xl tracking-tight">
+            {zoneFeed ? "Offres de vos zones" : "Offres ouvertes"}
+          </h2>
+          {feed.isSuccess && (
+            <span className="text-muted-foreground text-sm tabular-nums">
+              {feed.total} {feed.total > 1 ? "offres" : "offre"}
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="ghost" className="h-10 rounded-full bg-card px-4 lg:hidden">
+                <IconFilter />
+                Filtres{activeFilters > 0 && ` (${activeFilters})`}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-80 overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Filtres</SheetTitle>
+              </SheetHeader>
+              <div className="px-4 pb-6">{sidebar}</div>
+            </SheetContent>
+          </Sheet>
+          <SortSelect />
+        </div>
+      </div>
+
+      {/*
+        Desktop: this block is one screen tall and is the last thing on the
+        page, so scrolling the page carries the header and hero away until it
+        fills the screen. Only then do the columns scroll on their own
+        (`inner`); before that they are not scrollable, so the wheel moves the
+        page. At the top of the grid, scrolling up hands back to the page and
+        the hero returns. Phones keep the normal page scroll.
+      */}
+      <div className="flex gap-8 lg:min-h-0 lg:flex-1">
+        <aside
+          className={cn(
+            "no-scrollbar hidden w-60 shrink-0 pb-6 lg:block",
+            inner ? "overflow-y-auto" : "overflow-y-hidden",
+          )}
+        >
+          {sidebar}
+        </aside>
+
+        <div
+          className={cn(
+            "no-scrollbar min-w-0 flex-1 lg:-mx-1 lg:px-1 lg:pb-6",
+            inner ? "lg:overflow-y-auto" : "lg:overflow-y-hidden",
+          )}
+        >
+          {feed.isPending && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {Array.from({ length: 4 }, (_, i) => (
+                <JobCardSkeleton key={i} />
+              ))}
+            </div>
+          )}
+
+          {feed.isError && (
+            <div className="flex flex-col items-center gap-3 rounded-2xl bg-card p-10 text-center">
+              <p className="text-muted-foreground text-sm">
+                {friendlyError(feed.error, "Impossible de charger les offres.")}
+              </p>
+              <Button variant="outline" onClick={() => void feed.refetch()}>
+                <IconRefresh />
+                Réessayer
+              </Button>
+            </div>
+          )}
+
+          {feed.isSuccess && feed.jobs.length === 0 && (
+            <div className="flex flex-col items-center gap-2 rounded-2xl bg-card p-10 text-center">
+              <IconMoodEmpty className="size-8 text-muted-foreground" />
+              <p className="font-medium">{emptyTitle(zoneFeed, hasFilters)}</p>
+              <p className="max-w-sm text-muted-foreground text-sm">
+                {emptyText(zoneFeed, hasFilters)}
+              </p>
+            </div>
+          )}
+
+          {feed.jobs.length > 0 && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              {feed.jobs.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={job}
+                  icon={job.category ? iconBySlug.get(job.category.slug) : undefined}
+                />
+              ))}
+              {feed.isFetchingNextPage &&
+                Array.from({ length: 2 }, (_, i) => <JobCardSkeleton key={`more-${i}`} />)}
+            </div>
+          )}
+
+          <div ref={sentinel} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * True once the page is scrolled to its end, i.e. the feed block fills the
+ * screen and the hero is out of view. Then the columns take over scrolling.
+ */
+function usePageScrolledToEnd() {
+  const [atEnd, setAtEnd] = useState(false);
+
+  useEffect(() => {
+    const update = () => {
+      const root = document.documentElement;
+      setAtEnd(Math.ceil(globalThis.scrollY + globalThis.innerHeight) >= root.scrollHeight - 2);
+    };
+    update();
+    globalThis.addEventListener("scroll", update, { passive: true });
+    globalThis.addEventListener("resize", update);
+    return () => {
+      globalThis.removeEventListener("scroll", update);
+      globalThis.removeEventListener("resize", update);
+    };
+  }, []);
+
+  return atEnd;
+}
+
+function emptyTitle(zoneFeed: boolean, hasFilters: boolean) {
+  if (hasFilters) return "Aucune offre ne correspond";
+  return zoneFeed ? "Aucune offre dans vos zones" : "Aucune offre ouverte";
+}
+
+function emptyText(zoneFeed: boolean, hasFilters: boolean) {
+  if (hasFilters) return "Essayez une autre recherche, un autre lieu ou moins de filtres.";
+  return zoneFeed
+    ? "Revenez bientôt. Si vous n'avez aucune zone assignée, contactez votre responsable."
+    : "Revenez bientôt : de nouvelles offres sont publiées chaque jour.";
+}
