@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 
 import { IconMapPin, IconSearch, IconX } from "@tabler/icons-react";
 
@@ -22,10 +22,14 @@ const STARBURST = (() => {
   return `polygon(${points.join(", ")})`;
 })();
 
+/** How long typing must pause before the feed searches. */
+const SEARCH_DEBOUNCE_MS = 400;
+
 /**
- * The black hero under the header on "/": title, photo, and the search pill.
- * The pill edits a draft and applies it on "Rechercher", like the mockup's
- * button implies — typing does not refetch the feed on every key.
+ * The hero under the header on "/": title, photo, and the search pill.
+ * Searches as you type — once typing pauses, so the feed does not refetch on
+ * every key — and a picked place applies at once. "Rechercher" (or Enter)
+ * still applies straight away for anyone who reaches for it.
  */
 export function FeedHero() {
   const { isAuthenticated, zoneFeed } = useFeedMode();
@@ -35,6 +39,19 @@ export function FeedHero() {
     country: filters.country,
     city: filters.city,
   });
+
+  const appliedQ = filters.q;
+  useEffect(() => {
+    const next = q.trim();
+    if (next === appliedQ) return;
+    const timer = setTimeout(() => void setFilters({ q: next || null }), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [q, appliedQ, setFilters]);
+
+  function pickPlace(next: Place) {
+    setPlace(next);
+    void setFilters({ country: next.country || null, city: next.city || null });
+  }
 
   function submit(e: FormEvent) {
     e.preventDefault();
@@ -89,7 +106,7 @@ export function FeedHero() {
               />
             ) : (
               <>
-                <LocationPicker value={place} onChange={setPlace} />
+                <LocationPicker value={place} onChange={pickPlace} />
                 {isAuthenticated && (
                   <button
                     type="button"
