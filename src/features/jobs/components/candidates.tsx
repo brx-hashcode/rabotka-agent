@@ -48,6 +48,7 @@ import type {
   PhoneReveal,
 } from "#/lib/api/types";
 import { copyText } from "#/lib/clipboard";
+import { MATCH_TONE_CLASS, matchBand } from "#/lib/match";
 import { cn, getInitials } from "#/lib/utils";
 import { ActionDialog } from "./action-dialog";
 import { OffListPlacement } from "./off-list-placement";
@@ -155,7 +156,7 @@ function CandidateCard({
   jobId,
 }: Readonly<{ candidate: AgentCandidate; jobId: string }>) {
   const name = `${c.firstName} ${c.lastName}`.trim();
-  const match = Math.round(Math.min(Math.max(c.score, 0), 1) * 100);
+  const match = matchBand(c.matchScore);
 
   return (
     <article className="flex flex-col gap-4 rounded-2xl bg-card p-4 sm:p-5">
@@ -174,10 +175,17 @@ function CandidateCard({
           <p className="truncate text-muted-foreground text-sm">
             {[c.city, c.categories.slice(0, 2).join(", ")].filter(Boolean).join(" • ")}
           </p>
+          {match && (
+            <span
+              className={cn(
+                "mt-1.5 inline-flex rounded-full px-2.5 py-1 font-medium text-xs tabular-nums",
+                MATCH_TONE_CLASS[match.tone],
+              )}
+            >
+              {match.label} · {match.percent} %
+            </span>
+          )}
         </div>
-        <span className="shrink-0 rounded-full bg-chip-green px-2.5 py-1 font-semibold text-chip-green-foreground text-xs tabular-nums">
-          {match} %
-        </span>
       </div>
 
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-xs">

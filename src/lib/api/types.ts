@@ -140,8 +140,10 @@ export type AgentCandidate = {
   ratingCount: number;
   verificationStatus: string;
   categories: string[];
-  /** Match score, 0–1. */
+  /** Ranking order only — not a percentage to show. */
   score: number;
+  /** Fit for display, 0–1 (see `lib/match`); null/absent = no fit evidence. */
+  matchScore?: number | null;
   lead: AgentLead | null;
 };
 
