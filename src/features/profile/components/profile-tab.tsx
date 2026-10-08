@@ -3,6 +3,8 @@
 import { useState } from "react";
 import {
   IconBellRinging,
+  IconBrandWhatsapp,
+  IconPhoneCall,
   IconInfoCircle,
   IconLogout,
   IconMail,
@@ -16,6 +18,7 @@ import { Button } from "#/components/ui/button";
 import { LogoutDialog } from "#/features/layout/components/logout-dialog";
 import { useAgentMe } from "#/hooks/use-agent-me";
 import { usePush } from "#/hooks/use-push";
+import { useSupportContact } from "#/hooks/use-support-contact";
 import { cn } from "#/lib/utils";
 
 const STATUS: Record<string, { label: string; tone: string }> = {
@@ -89,18 +92,7 @@ export function ProfileTab() {
         )}
       </section>
 
-      <section className="flex items-start gap-3 rounded-3xl bg-card p-5 sm:p-6 lg:col-span-2">
-        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-page text-muted-foreground">
-          <IconInfoCircle className="size-5" />
-        </span>
-        <div className="space-y-1">
-          <p className="font-semibold">Une information à corriger ?</p>
-          <p className="text-muted-foreground text-sm">
-            Votre photo, vos coordonnées et vos zones sont gérées par l&apos;équipe Rabotka.
-            Contactez-la pour les modifier.
-          </p>
-        </div>
-      </section>
+      <SupportCard />
 
       <PushCard />
 
@@ -186,6 +178,71 @@ function PushCard() {
         >
           {push.state === "on" ? "Désactiver" : "Activer"}
         </Button>
+      )}
+    </section>
+  );
+}
+
+/**
+ * How to reach Rabotka about a wrong detail: the contact the admins set in
+ * their console (public/config/contact). Each way shows only when it is set;
+ * with none, the card keeps its sentence.
+ */
+function SupportCard() {
+  const { data: contact } = useSupportContact();
+  const phone = contact?.phone.trim() ?? "";
+  const email = contact?.email.trim() ?? "";
+  const digits = phone.replace(/\D/g, "");
+
+  return (
+    <section className="flex flex-col gap-4 rounded-3xl bg-card p-5 sm:p-6 lg:col-span-2">
+      <div className="flex items-start gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-page text-muted-foreground">
+          <IconInfoCircle className="size-5" />
+        </span>
+        <div className="min-w-0 space-y-1">
+          <p className="font-semibold">Une information à corriger ?</p>
+          <p className="text-muted-foreground text-sm">
+            Votre photo, vos coordonnées et vos zones sont gérées par l&apos;équipe Rabotka.
+            {phone || email ? " Écrivez-lui ou appelez-la :" : " Contactez-la pour les modifier."}
+          </p>
+          {(phone || email) && (
+            <p className="text-sm">
+              {[phone, email].filter(Boolean).join(" · ")}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {(phone || email) && (
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:pl-[52px]">
+          {digits && (
+            <Button
+              // Full width on phones: the main way to reach support.
+              className="col-span-2 rounded-full bg-whatsapp text-white shadow-none hover:bg-whatsapp/90"
+              render={<a href={`https://wa.me/${digits}`} target="_blank" rel="noreferrer" />}
+            >
+              <IconBrandWhatsapp />
+              WhatsApp
+            </Button>
+          )}
+          {phone && (
+            <Button variant="secondary" className="rounded-full" render={<a href={`tel:${phone}`} />}>
+              <IconPhoneCall />
+              Appeler
+            </Button>
+          )}
+          {email && (
+            <Button
+              variant="secondary"
+              className="rounded-full"
+              render={<a href={`mailto:${email}?subject=${encodeURIComponent("Agent Rabotka — correction de mes informations")}`} />}
+            >
+              <IconMail />
+              Email
+            </Button>
+          )}
+        </div>
       )}
     </section>
   );

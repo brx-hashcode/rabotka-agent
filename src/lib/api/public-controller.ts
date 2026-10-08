@@ -9,6 +9,9 @@ import type {
 
 export type Country = { code: string; name: string };
 
+/** `GET public/config/contact` — Rabotka's own contact, set in the admin's Contact card. */
+export type SupportContact = { email: string; phone: string; address: string };
+
 /** No session needed: the open-jobs feed, job categories and the geo lists. */
 class PublicController extends AgentBaseController {
   listJobs(query: JobsQuery = {}): Promise<JobsPage<PublicJob>> {
@@ -37,6 +40,10 @@ class PublicController extends AgentBaseController {
     return this.get("/public/geo/countries");
   }
 
+  getSupportContact(): Promise<SupportContact> {
+    return this.get("/public/config/contact");
+  }
+
   getCities(countryCode: string): Promise<string[]> {
     return this.get(
       `/public/geo/countries/${encodeURIComponent(countryCode)}/cities`,
@@ -51,3 +58,4 @@ export const getPublicJob = controller.getJob.bind(controller);
 export const getJobCategories = controller.getJobCategories.bind(controller);
 export const getCountries = controller.getCountries.bind(controller);
 export const getCities = controller.getCities.bind(controller);
+export const getSupportContact = controller.getSupportContact.bind(controller);
