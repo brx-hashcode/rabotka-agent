@@ -47,6 +47,8 @@ export type PublicJob = {
 /** `GET agent/jobs` — the full shape, for jobs in the agent's zones (toAgentJob). */
 export type AgentJob = PublicJob & {
   description: string | null;
+  /** The employer's « Note complémentaire » (e.g. what to bring). */
+  note?: string | null;
   amount: number | null;
   paymentFlow: PaymentFlow | null;
   address: string | null;
