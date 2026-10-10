@@ -13,6 +13,7 @@ import {
   IconHome,
   IconLock,
   IconMapPin,
+  IconNote,
   IconShare,
   IconUsers,
   IconUsersGroup,
@@ -212,6 +213,18 @@ export function JobSummary({
           </div>
         )}
       </section>
+
+      {"note" in job && job.note?.trim() && (
+        <section className="space-y-2">
+          <h2 className="flex items-center gap-1.5 font-semibold text-sm">
+            <IconNote className="size-4 text-muted-foreground" />
+            Note complémentaire
+          </h2>
+          <p className="whitespace-pre-line rounded-2xl bg-page px-4 py-4 text-sm leading-relaxed">
+            {job.note.trim()}
+          </p>
+        </section>
+      )}
     </article>
   );
 }

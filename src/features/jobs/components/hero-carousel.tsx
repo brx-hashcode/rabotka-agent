@@ -10,11 +10,7 @@ const HOME_PHOTOS = [1, 2, 3, 4, 5, 6].map((n) => `/hero/worker-${n}.jpg`);
 
 const INTERVAL_MS = 4500;
 
-/**
- * Photos stacked on each other, cross-fading every few seconds. Pauses while
- * the tab is hidden and stays on the first photo for reduced motion.
- * Defaults to the home hero's photos; the sign-in panel passes its own.
- */
+
 export function HeroCarousel({
   className,
   style,

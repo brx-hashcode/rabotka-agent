@@ -6,6 +6,7 @@ import { IconMapPin, IconSearch, IconX } from "@tabler/icons-react";
 
 import { Button } from "#/components/ui/button";
 import { useAgentMe } from "#/hooks/use-agent-me";
+import { useHydrated } from "#/hooks/use-hydrated";
 import { useFeedFilters, useFeedMode } from "#/hooks/use-jobs-feed";
 import { HeroCarousel } from "./hero-carousel";
 import { LocationPicker, type Place } from "./location-picker";
@@ -143,20 +144,20 @@ export function FeedHero() {
  */
 function AgentZones({ onClear }: Readonly<{ onClear: () => void }>) {
   const { data: agent } = useAgentMe();
-  const zones = agent?.zones.map((z) => z.city).join(" · ");
+  // The server never has the agent; the browser may already have it cached.
+  // Until hydration is over, render what the server did.
+  const hydrated = useHydrated();
+  const known = hydrated ? agent : undefined;
+  const zones = known?.zones.map((z) => z.city).join(" · ");
 
   return (
     <div className="flex min-w-0 flex-1 items-center gap-3 py-3 text-[15px]">
       <IconMapPin className="size-5 shrink-0 text-muted-foreground" />
       <span className="min-w-0 flex-1 truncate">
-        {zones ? (
-          <>
-            <span className="text-muted-foreground">Vos zones : </span>
-            {zones}
-          </>
-        ) : (
-          <span className="text-muted-foreground">Aucune zone assignée</span>
-        )}
+        <span className="text-muted-foreground">
+          {known && !zones ? "Aucune zone assignée" : "Vos zones : "}
+        </span>
+        {zones}
       </span>
       <button
         type="button"
