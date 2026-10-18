@@ -27,6 +27,9 @@ export async function generateMetadata(): Promise<Metadata> {
     description: DESCRIPTION,
     applicationName: "Rabotka Agent",
     manifest: "/manifest.json",
+    // Added to an iPhone home screen, open full screen like an app, under the
+    // install icon (src/app/apple-icon.png, from public/rabotka-app-icon.jpg).
+    appleWebApp: { capable: true, title: "Rabotka Agent" },
     robots: { index: false, follow: false },
     openGraph: {
       type: "website",

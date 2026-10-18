@@ -1,19 +1,15 @@
 {
+  "id": "/",
   "short_name": "Rabotka Agent",
   "name": "Rabotka – Espace agent",
   "icons": [
-    {
-      "src": "/favicon.ico",
-      "sizes": "256x256",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "/rabotka-logo.png",
-      "type": "image/png",
-      "sizes": "1934x1934"
-    }
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/rabotka-app-icon.jpg", "sizes": "1300x1300", "type": "image/jpeg", "purpose": "any" }
   ],
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "theme_color": "#CBFFA5",
   "background_color": "#ffffff"
