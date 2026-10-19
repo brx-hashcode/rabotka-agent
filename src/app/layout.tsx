@@ -29,7 +29,15 @@ export async function generateMetadata(): Promise<Metadata> {
     manifest: "/manifest.json",
     // Added to an iPhone home screen, open full screen like an app, under the
     // install icon (src/app/apple-icon.png, from public/rabotka-app-icon.jpg).
-    appleWebApp: { capable: true, title: "Rabotka Agent" },
+    // black-translucent: in the iPhone home-screen app the page draws under
+    // the status bar, so the lime strip below fills it instead of iOS's own
+    // opaque black bar. The clock is then always white — iOS offers no dark
+    // text in this mode.
+    appleWebApp: {
+      capable: true,
+      title: "Rabotka Agent",
+      statusBarStyle: "black-translucent",
+    },
     robots: { index: false, follow: false },
     openGraph: {
       type: "website",
@@ -51,6 +59,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export const viewport: Viewport = {
   themeColor: "#CBFFA5",
+  // Lets env(safe-area-inset-top) report the status bar's height.
+  viewportFit: "cover",
 };
 
 /**
@@ -69,7 +79,14 @@ export default async function RootLayout({ children, modal }: LayoutProps<"/">) 
           hydrates; only this element's own attributes are exempt. */}
       <body className="min-h-svh bg-header antialiased" suppressHydrationWarning>
         <SplashScreen />
-        <div className="min-h-svh bg-page">
+        {/* Behind the iPhone status bar in the installed app (zero tall
+            anywhere else), fixed so scrolled content never slides under the
+            clock. The wrapper below starts beneath it. */}
+        <div
+          aria-hidden
+          className="fixed inset-x-0 top-0 z-50 h-[env(safe-area-inset-top)] bg-header"
+        />
+        <div className="min-h-svh bg-page pt-[env(safe-area-inset-top)]">
           <Providers isAuthenticated={isAuthenticated}>
             {children}
             {modal}
