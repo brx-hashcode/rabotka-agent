@@ -22,7 +22,7 @@ export type AgentSelf = {
 };
 
 export type EmploymentType = "MISSION" | "CDD" | "CDI" | "STAGE";
-export type PaymentFlow = "HOURLY" | "DAILY" | "MONTHLY";
+export type PaymentFlow = "TASK" | "HOURLY" | "DAILY" | "MONTHLY";
 
 export type JobCategory = { id: string; name: string; slug: string };
 

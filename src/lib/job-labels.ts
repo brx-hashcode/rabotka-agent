@@ -11,7 +11,9 @@ export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
   STAGE: "Stage",
 };
 
+// Read after an amount: « 15 000 FCFA la tâche ».
 export const PAYMENT_FLOW_LABELS: Record<PaymentFlow, string> = {
+  TASK: "la tâche",
   HOURLY: "par heure",
   DAILY: "par jour",
   MONTHLY: "par mois",
