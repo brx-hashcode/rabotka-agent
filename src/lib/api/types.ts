@@ -54,6 +54,10 @@ export type AgentJob = PublicJob & {
   address: string | null;
   quantity: number;
   status: string;
+  /** "limited": their candidates were all refused, so no address or pay. */
+  access: "full" | "limited";
+  /** False on a job only readable from history: closed, or out of their zones. */
+  canPlace: boolean;
 };
 
 export type JobSort = "recent" | "start";
@@ -182,6 +186,8 @@ export type JobPlacement = {
   updatedAt: string;
   /** The lead behind it, for the phone reveal; null for very old placements. */
   leadId: string | null;
+  /** "AUTO_FILL" when the post being filled closed it, not the employer. */
+  rejectionSource: string | null;
   worker: {
     id: string;
     firstName: string;
@@ -189,7 +195,14 @@ export type JobPlacement = {
     avatarUrl: string | null;
     city: string | null;
   };
-  job: { id: string; title: string; city: string | null };
+  job: {
+    id: string;
+    title: string;
+    city: string | null;
+    status: string;
+    /** False once the offer was deleted: nothing left to open. */
+    available: boolean;
+  };
   /** Decided by the commission sweep after the placement; null until then. */
   commission: PlacementCommission | null;
 };

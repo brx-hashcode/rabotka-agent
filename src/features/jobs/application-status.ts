@@ -12,6 +12,10 @@ export const APPLICATION_STATUS: Record<ApplicationStatus, { label: string; tone
   CANCELLED: { label: "Annulée", tone: "bg-muted text-muted-foreground" },
 };
 
-export function applicationStatus(status: ApplicationStatus) {
+export function applicationStatus(status: ApplicationStatus, rejectionSource?: string | null) {
+  // Closed by the post being filled: nobody judged this candidate.
+  if (status === "REJECTED" && rejectionSource === "AUTO_FILL") {
+    return { label: "Poste pourvu", tone: "bg-muted text-muted-foreground" };
+  }
   return APPLICATION_STATUS[status] ?? { label: status, tone: "bg-muted text-muted-foreground" };
 }
