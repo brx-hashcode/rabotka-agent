@@ -52,7 +52,7 @@ export function Placements({ jobId }: Readonly<{ jobId: string }>) {
 
 function PlacementRow({ placement: p }: Readonly<{ placement: JobPlacement }>) {
   const name = `${p.worker.firstName} ${p.worker.lastName}`.trim();
-  const status = applicationStatus(p.status);
+  const status = applicationStatus(p.status, p.rejectionSource);
   const queryClient = useQueryClient();
   const revealKey = ["reveal", p.leadId] as const;
   // Same cache as the candidate card: showing it again must not log another reveal.

@@ -27,12 +27,14 @@ type Tab = "candidats" | "offre";
  * Agents (job in their zones): desktop shows the job on the left and the
  * suggested workers on the right; phones show a compact header and two tabs,
  * opening on the workers. Visitors, and agents looking at a job outside
- * their zones, get the job alone, centred.
+ * their zones, get the job alone, centred. A job the agent placed someone on
+ * but can no longer work shows those placements above it.
  */
 export function JobWorkspace({ id }: Readonly<{ id: string }>) {
   const detail = useJobDetail(id);
   const isAgentJob = detail.data?.kind === "agent";
-  const candidates = useCandidates(id, isAgentJob);
+  const canPlace = detail.data?.kind === "agent" && detail.data.job.canPlace;
+  const candidates = useCandidates(id, canPlace);
   const [tab, setTab] = useState<Tab>("candidats");
   const jobPath = `/jobs/${id}`;
 
@@ -45,7 +47,7 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
         <IconArrowLeft className="size-4" />
         Toutes les offres
       </Link>
-      {detail.data && (
+      {detail.data && (canPlace || !isAgentJob) && (
         <button
           type="button"
           onClick={() => void shareJob(detail.data.job.title, jobPath)}
@@ -85,6 +87,21 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
               Se connecter pour voir la rémunération
             </Button>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // From their history: the job and who they placed, nothing left to do on it.
+  if (!canPlace) {
+    return (
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6">
+        <div>
+          {topBar}
+          <Placements jobId={id} />
+        </div>
+        <div className="rounded-3xl bg-card p-5 sm:p-8">
+          <JobSummary detail={detail.data} />
         </div>
       </div>
     );

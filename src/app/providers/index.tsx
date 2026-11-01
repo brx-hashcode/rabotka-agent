@@ -19,9 +19,10 @@ function makeQueryClient() {
       queries: {
         staleTime: 5 * 60 * 1000,
         // A 401 has already been through one refresh-and-retry (withSession);
-        // retrying it again only delays the redirect to sign-in.
+        // retrying it again only delays the redirect to sign-in. A 404 will
+        // not change either.
         retry: (failureCount, error) =>
-          httpStatusOf(error) !== 401 && failureCount < 3,
+          httpStatusOf(error) !== 401 && httpStatusOf(error) !== 404 && failureCount < 3,
       },
     },
   });

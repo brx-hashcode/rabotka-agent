@@ -3,17 +3,20 @@ import { fr } from "date-fns/locale";
 
 import { Avatar, AvatarFallback, AvatarImage } from "#/components/ui/avatar";
 import { applicationStatus } from "#/features/jobs/application-status";
+import { jobStatus } from "#/features/jobs/job-status";
 import type { JobPlacement, PlacementCommission } from "#/lib/api/types";
 import { cn, formatXAF, getInitials } from "#/lib/utils";
 
 /** One worker the agent placed: who, on which job, where it stands, what it earns. */
 export function PlacementItem({ placement: p }: Readonly<{ placement: JobPlacement }>) {
   const name = `${p.worker.firstName} ${p.worker.lastName}`.trim();
-  const status = applicationStatus(p.status);
-  const commission = commissionChip(p.commission);
+  const status = applicationStatus(p.status, p.rejectionSource);
+  const failed = p.status === "REJECTED" || p.status === "CANCELLED";
+  // Nothing is coming on a placement that ended without a commission.
+  const commission = failed && !p.commission ? null : commissionChip(p.commission);
 
-  return (
-    <div className="flex items-start gap-3 p-4 sm:items-center sm:p-5">
+  const row = (
+    <>
       <Avatar className="size-11 shrink-0">
         {p.worker.avatarUrl && <AvatarImage src={p.worker.avatarUrl} alt={name} />}
         <AvatarFallback>{getInitials(name)}</AvatarFallback>
@@ -25,6 +28,8 @@ export function PlacementItem({ placement: p }: Readonly<{ placement: JobPlaceme
           <p className="truncate text-muted-foreground text-xs">
             {p.job.title}
             {" · "}
+            {jobStatus(p.job.status).label}
+            {" · "}
             {format(new Date(p.placedAt), "d MMM yyyy", { locale: fr })}
           </p>
         </div>
@@ -32,15 +37,26 @@ export function PlacementItem({ placement: p }: Readonly<{ placement: JobPlaceme
           <span className={cn("rounded-full px-2.5 py-1 font-medium text-xs", status.tone)}>
             {status.label}
           </span>
-          <span
-            title={commission.title}
-            className={cn("rounded-full px-2.5 py-1 font-medium text-xs tabular-nums", commission.tone)}
-          >
-            {commission.label}
-          </span>
+          {commission && (
+            <span
+              title={commission.title}
+              className={cn("rounded-full px-2.5 py-1 font-medium text-xs tabular-nums", commission.tone)}
+            >
+              {commission.label}
+            </span>
+          )}
         </div>
       </div>
-    </div>
+    </>
+  );
+
+  const className = "flex items-start gap-3 p-4 sm:items-center sm:p-5";
+  if (!p.job.available) return <div className={className}>{row}</div>;
+  // A full page, as from a job's side panel: the placements are on the workspace.
+  return (
+    <a href={`/jobs/${p.job.id}`} className={cn(className, "transition-colors hover:bg-page/60")}>
+      {row}
+    </a>
   );
 }
 
