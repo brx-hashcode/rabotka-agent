@@ -11,8 +11,8 @@ import { AgentMenu } from "./agent-menu";
 
 /**
  * The black band the mockup opens with. On "/" the feed hero continues it.
- * "Se connecter" is a soft link to /auth/sign-in, which the `@modal` slot
- * intercepts into the dialog; `next` brings the agent back here afterwards.
+ * "Se connecter" goes to /auth/sign-in; `next` brings the agent back here
+ * afterwards.
  */
 export function SiteHeader() {
   const { isAuthenticated } = useSession();

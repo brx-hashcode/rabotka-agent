@@ -77,7 +77,7 @@ export function JobDetail({ id }: Readonly<{ id: string }>) {
       <Button
         size="xl"
         className="w-full rounded-full"
-        render={<Link href={`/auth/sign-in?next=${encodeURIComponent(jobPath)}`} scroll={false} />}
+        render={<Link href={`/auth/sign-in?next=${encodeURIComponent(jobPath)}`} />}
       >
         Se connecter pour voir la rémunération
       </Button>

@@ -17,8 +17,7 @@ import { Step1EmailForm } from "./step1-email-form";
 import { Step2OtpForm } from "./step2-otp-form";
 
 /**
- * Email, then the 6-digit code. The same component fills the full
- * /auth/sign-in page and the intercepted dialog, so both behave identically.
+ * Email, then the 6-digit code, on the /auth/sign-in page.
  *
  * The backend answers send-otp with success whether or not the email belongs
  * to an agent (no enumeration), so step 2 never says "unknown address".
