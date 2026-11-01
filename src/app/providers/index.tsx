@@ -49,9 +49,8 @@ export function Providers({ children, isAuthenticated }: ProvidersProps) {
   const router = useRouter();
 
   // The session could not be refreshed (cookies already cleared by
-  // /session/refresh): drop cached agent data and open sign-in. A soft
-  // navigation, so it is intercepted into the dialog over the current page,
-  // and `next` brings the agent back to it.
+  // /session/refresh): drop cached agent data and open sign-in. `next`
+  // brings the agent back to the current page.
   useEffect(() => {
     setSessionExpiredHandler(() => {
       queryClient.clear();
