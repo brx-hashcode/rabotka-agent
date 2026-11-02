@@ -6,9 +6,8 @@ import { IconSearch, IconX } from "@tabler/icons-react";
 import { Checkbox } from "#/components/ui/checkbox";
 import { Slider } from "#/components/ui/slider";
 import { useJobCategories } from "#/hooks/use-job-categories";
-import { EMPLOYMENT_TYPES, useFeedFilters } from "#/hooks/use-jobs-feed";
+import { useFeedFilters } from "#/hooks/use-jobs-feed";
 import type { JobFacets } from "#/lib/api/types";
-import { EMPLOYMENT_TYPE_LABELS } from "#/lib/job-labels";
 import { cn, formatXAF } from "#/lib/utils";
 
 /** Number of active sidebar filters (for the mobile "Filtres (n)" button). */
@@ -41,8 +40,13 @@ export function FiltersSidebar({
 
   return (
     <div className="flex flex-col gap-8">
+      {/* No contract filter: agents only work missions. */}
+      {showPay && facets?.amount && facets.amount.max > facets.amount.min && (
+        <PayRange bounds={facets.amount} />
+      )}
+
       <FilterGroup
-        title="Type de contrat"
+        title="Catégories"
         action={
           hasAny && (
             <button
@@ -57,22 +61,6 @@ export function FiltersSidebar({
           )
         }
       >
-        {EMPLOYMENT_TYPES.map((type) => (
-          <CheckRow
-            key={type}
-            label={EMPLOYMENT_TYPE_LABELS[type]}
-            count={facets ? (facets.employmentType[type] ?? 0) : undefined}
-            checked={f.types.includes(type)}
-            onChange={() => void setFilters({ types: toggle(f.types, type) })}
-          />
-        ))}
-      </FilterGroup>
-
-      {showPay && facets?.amount && facets.amount.max > facets.amount.min && (
-        <PayRange bounds={facets.amount} />
-      )}
-
-      <FilterGroup title="Catégories">
         <CategoryPicker
           categories={sortedCategories}
           pending={categories.isPending}
