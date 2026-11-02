@@ -28,12 +28,23 @@ import { ActionDialog } from "./action-dialog";
 
 /**
  * The workers this agent placed on the job — directly, by invitation or by
- * number — and where each application stands. Hidden until there is one.
+ * number — and where each application stands. Hidden until there is one,
+ * unless `showEmpty` keeps its column filled.
  */
-export function Placements({ jobId }: Readonly<{ jobId: string }>) {
+export function Placements({ jobId, showEmpty = false }: Readonly<{ jobId: string; showEmpty?: boolean }>) {
   const placements = usePlacements(jobId, true);
   const list = placements.data ?? [];
-  if (list.length === 0) return null;
+  if (list.length === 0) {
+    if (!showEmpty || placements.isPending) return null;
+    return (
+      <section className="flex flex-col gap-3">
+        <h2 className="font-semibold text-lg">Mes placements</h2>
+        <p className="rounded-2xl bg-card px-5 py-8 text-center text-muted-foreground text-sm">
+          Pas encore de placement sur cette offre.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="flex flex-col gap-3">

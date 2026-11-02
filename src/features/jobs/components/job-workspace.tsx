@@ -28,7 +28,8 @@ type Tab = "candidats" | "offre";
  * suggested workers on the right; phones show a compact header and two tabs,
  * opening on the workers. Visitors, and agents looking at a job outside
  * their zones, get the job alone, centred. A job the agent placed someone on
- * but can no longer work shows those placements above it.
+ * but can no longer work shows those placements beside it, or under it on
+ * phones.
  */
 export function JobWorkspace({ id }: Readonly<{ id: string }>) {
   const detail = useJobDetail(id);
@@ -95,13 +96,15 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
   // From their history: the job and who they placed, nothing left to do on it.
   if (!canPlace) {
     return (
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6 sm:px-6">
-        <div>
-          {topBar}
-          <Placements jobId={id} />
-        </div>
-        <div className="rounded-3xl bg-card p-5 sm:p-8">
-          <JobSummary detail={detail.data} />
+      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+        {topBar}
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-8">
+          <div className="rounded-3xl bg-card p-5 sm:p-8">
+            <JobSummary detail={detail.data} />
+          </div>
+          <div className="lg:sticky lg:top-6">
+            <Placements jobId={id} showEmpty />
+          </div>
         </div>
       </div>
     );
