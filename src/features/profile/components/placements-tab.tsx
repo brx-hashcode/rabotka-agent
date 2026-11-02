@@ -9,6 +9,7 @@ import { friendlyError } from "#/lib/api/friendly-error";
 import type { PlacementGroup } from "#/lib/api/types";
 import { cn } from "#/lib/utils";
 import { PlacementItem } from "./placement-item";
+import { PeopleRowsSkeleton } from "#/components/page-skeletons";
 
 const FILTERS: { label: string; value: PlacementGroup | null }[] = [
   { label: "Tous", value: null },
@@ -46,11 +47,7 @@ export function PlacementsTab() {
       </div>
 
       {list.isPending ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-20 animate-pulse rounded-2xl bg-card" />
-          ))}
-        </div>
+        <PeopleRowsSkeleton rows={4} />
       ) : list.isError ? (
         <p className="rounded-2xl bg-card p-6 text-center text-muted-foreground text-sm">
           {friendlyError(list.error, "Impossible de charger vos placements.")}

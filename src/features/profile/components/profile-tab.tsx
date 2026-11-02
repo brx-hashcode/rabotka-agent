@@ -20,6 +20,7 @@ import { useAgentMe } from "#/hooks/use-agent-me";
 import { usePush } from "#/hooks/use-push";
 import { useSupportContact } from "#/hooks/use-support-contact";
 import { cn } from "#/lib/utils";
+import { Bone } from "#/components/page-skeletons";
 
 const STATUS: Record<string, { label: string; tone: string }> = {
   ACTIVE: { label: "Actif", tone: "bg-chip-green text-chip-green-foreground" },
@@ -38,9 +39,18 @@ export function ProfileTab() {
 
   if (!me.data) {
     return (
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="h-64 animate-pulse rounded-3xl bg-card" />
-        <div className="h-64 animate-pulse rounded-3xl bg-card" />
+      <div role="status" aria-label="Chargement" className="grid gap-4 lg:grid-cols-2">
+        {[4, 2].map((rows, card) => (
+          <div key={card} className="flex flex-col gap-4 rounded-3xl bg-card p-5 sm:p-6">
+            <Bone className="h-5 w-32" />
+            {Array.from({ length: rows }, (_, i) => (
+              <div key={i} className="flex items-center justify-between gap-4 py-1">
+                <Bone className="h-4 w-24" />
+                <Bone className="h-4 w-40" />
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
     );
   }

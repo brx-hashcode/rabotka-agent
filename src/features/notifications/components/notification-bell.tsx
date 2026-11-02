@@ -15,6 +15,7 @@ import type { AgentNotification } from "#/lib/api/types";
 import { notificationLook } from "../notification-look";
 import { postedAgo } from "#/lib/job-labels";
 import { cn } from "#/lib/utils";
+import { Bone } from "#/components/page-skeletons";
 
 
 /** The header's bell: unread count, the latest notifications, and push for this device. */
@@ -73,7 +74,14 @@ export function NotificationBell() {
           <div className="-mx-1 flex max-h-[min(60svh,28rem)] flex-col gap-1 overflow-y-auto px-1">
             {feed.isPending ? (
               [0, 1, 2].map((i) => (
-                <div key={i} className="h-16 animate-pulse rounded-2xl bg-page" />
+                <div key={i} className="flex items-start gap-3 rounded-2xl p-3">
+                  <Bone className="size-9 shrink-0 rounded-xl" />
+                  <div className="flex-1 space-y-2">
+                    <Bone className="h-4 w-3/4" />
+                    <Bone className="h-3 w-full" />
+                    <Bone className="h-3 w-16" />
+                  </div>
+                </div>
               ))
             ) : feed.notifications.length === 0 ? (
               <div className="flex flex-col items-center gap-2 px-4 py-8 text-center">

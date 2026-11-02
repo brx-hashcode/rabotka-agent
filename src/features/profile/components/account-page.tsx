@@ -11,6 +11,7 @@ import { OverviewTab } from "./overview-tab";
 import { PlacementsTab } from "./placements-tab";
 import { ProfileTab } from "./profile-tab";
 import { WalletTab } from "./wallet-tab";
+import { Bone } from "#/components/page-skeletons";
 
 export const ACCOUNT_TABS = ["apercu", "portefeuille", "placements", "profil"] as const;
 export type AccountTab = (typeof ACCOUNT_TABS)[number];
@@ -61,7 +62,7 @@ export function AccountPage() {
             {agent ? (
               <h1 className="truncate font-semibold text-2xl tracking-tight sm:text-3xl">{name}</h1>
             ) : (
-              <div className="h-8 w-48 animate-pulse rounded-lg bg-card" />
+              <Bone onPage className="h-8 w-48" />
             )}
             <div className="flex flex-wrap items-center gap-1.5 text-muted-foreground text-sm">
               <span>Agent Rabotka</span>

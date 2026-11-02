@@ -39,6 +39,7 @@ import { copyText } from "#/lib/clipboard";
 import type { AgentJob } from "#/lib/api/types";
 import { jobStatus } from "#/features/jobs/job-status";
 import { cn, formatXAF } from "#/lib/utils";
+import { JobSummarySkeleton } from "#/components/page-skeletons";
 
 /** Shares a job link: the phone's share sheet, or a copied link. */
 export async function shareJob(title: string, jobPath: string) {
@@ -378,18 +379,7 @@ function Chip({ tone, children }: Readonly<{ tone: keyof typeof TONES; children:
   );
 }
 
+/** The offer's summary while it loads, as JobSummary lays it out. */
 export function JobDetailSkeleton() {
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex gap-4">
-        <div className="size-14 animate-pulse rounded-2xl bg-muted" />
-        <div className="flex-1 space-y-2 pt-1">
-          <div className="h-6 w-3/4 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-1/3 animate-pulse rounded bg-muted" />
-        </div>
-      </div>
-      <div className="h-20 animate-pulse rounded-2xl bg-muted" />
-      <div className="h-64 animate-pulse rounded-2xl bg-muted" />
-    </div>
-  );
+  return <JobSummarySkeleton />;
 }

@@ -1,14 +1,6 @@
-import { BrandLoader } from "#/components/brand-loader";
+import { JobsFeedSkeleton } from "#/components/page-skeletons";
 
-/** Between pages: the brand loader under the header while the next page renders. */
+/** The home page while it loads: its shape, not a spinner. */
 export default function Loading() {
-  return (
-    <div
-      role="status"
-      aria-label="Chargement"
-      className="flex min-h-[calc(100svh-4rem)] items-center justify-center px-4"
-    >
-      <BrandLoader />
-    </div>
-  );
+  return <JobsFeedSkeleton />;
 }

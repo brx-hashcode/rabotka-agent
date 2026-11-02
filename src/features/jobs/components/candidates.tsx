@@ -52,6 +52,7 @@ import { MATCH_TONE_CLASS, matchBand } from "#/lib/match";
 import { cn, getInitials } from "#/lib/utils";
 import { ActionDialog } from "./action-dialog";
 import { OffListPlacement } from "./off-list-placement";
+import { Bone } from "#/components/page-skeletons";
 
 const OUTCOMES: {
   value: CallOutcome;
@@ -125,7 +126,24 @@ export function CandidatesList({
 
       {candidates.isPending &&
         Array.from({ length: 3 }, (_, i) => (
-          <div key={i} className="h-44 animate-pulse rounded-2xl bg-card" />
+          <div key={i} role="status" aria-label="Chargement" className="flex flex-col gap-4 rounded-2xl bg-card p-4 sm:p-5">
+            <div className="flex items-center gap-3">
+              <Bone className="size-12 shrink-0 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Bone className="h-4 w-40 max-w-full" />
+                <Bone className="h-3 w-28" />
+              </div>
+              <Bone className="h-6 w-14 rounded-full" />
+            </div>
+            <div className="flex gap-1.5">
+              <Bone className="h-5 w-20 rounded-md" />
+              <Bone className="h-5 w-16 rounded-md" />
+            </div>
+            <div className="flex gap-2">
+              <Bone className="h-10 flex-1 rounded-full" />
+              <Bone className="h-10 flex-1 rounded-full" />
+            </div>
+          </div>
         ))}
 
       {candidates.isError && (

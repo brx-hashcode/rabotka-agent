@@ -9,6 +9,7 @@ import { useJobCategories } from "#/hooks/use-job-categories";
 import { useFeedFilters } from "#/hooks/use-jobs-feed";
 import type { JobFacets } from "#/lib/api/types";
 import { cn, formatXAF } from "#/lib/utils";
+import { Bone } from "#/components/page-skeletons";
 
 /** Number of active sidebar filters (for the mobile "Filtres (n)" button). */
 export function useActiveFilterCount() {
@@ -233,7 +234,7 @@ function CategoryPicker({
       <div className="flex flex-col gap-2.5">
         {pending &&
           Array.from({ length: 5 }, (_, i) => (
-            <div key={i} className="h-5 animate-pulse rounded bg-muted" />
+            <Bone key={i} onPage className="h-5" />
           ))}
         {visible.map((c) => (
           <CheckRow

@@ -11,13 +11,13 @@ import { cn } from "#/lib/utils";
 import { CandidatesList } from "./candidates";
 import { Placements } from "./placements";
 import {
-  JobDetailSkeleton,
   JobHeader,
   JobLoadError,
   JobSummary,
   ROUND_BUTTON,
   shareJob,
 } from "./job-detail";
+import { JobWorkspaceSkeleton } from "#/components/page-skeletons";
 
 type Tab = "candidats" | "offre";
 
@@ -61,12 +61,14 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
     </div>
   );
 
-  if (detail.isPending || detail.isError) {
+  // Loading: the wide two-column frame the offer opens in, not a narrow card.
+  if (detail.isPending) return <JobWorkspaceSkeleton />;
+  if (detail.isError) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
         {topBar}
         <div className="rounded-3xl bg-card p-5 sm:p-8">
-          {detail.isPending ? <JobDetailSkeleton /> : <JobLoadError error={detail.error} />}
+          <JobLoadError error={detail.error} />
         </div>
       </div>
     );
