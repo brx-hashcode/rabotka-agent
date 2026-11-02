@@ -25,6 +25,7 @@ import type { JobPlacement, PhoneReveal } from "#/lib/api/types";
 import { cn, getInitials } from "#/lib/utils";
 import { applicationStatus } from "#/features/jobs/application-status";
 import { ActionDialog } from "./action-dialog";
+import { PlacementsSkeleton } from "#/components/page-skeletons";
 
 /**
  * The workers this agent placed on the job — directly, by invitation or by
@@ -35,7 +36,8 @@ export function Placements({ jobId, showEmpty = false }: Readonly<{ jobId: strin
   const placements = usePlacements(jobId, true);
   const list = placements.data ?? [];
   if (list.length === 0) {
-    if (!showEmpty || placements.isPending) return null;
+    if (placements.isPending) return showEmpty ? <PlacementsSkeleton /> : null;
+    if (!showEmpty) return null;
     return (
       <section className="flex flex-col gap-3">
         <h2 className="font-semibold text-lg">Mes placements</h2>

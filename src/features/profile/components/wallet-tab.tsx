@@ -39,6 +39,7 @@ import {
 } from "#/lib/movements";
 import { cn, formatXAF } from "#/lib/utils";
 import { WithdrawDialog } from "./withdraw-dialog";
+import { Bone, PeopleRowsSkeleton } from "#/components/page-skeletons";
 
 /** The agent's money: what they can withdraw, what is coming, and every movement. */
 export function WalletTab() {
@@ -55,10 +56,23 @@ export function WalletTab() {
     );
   }
   if (!wallet.wallet) {
+    // The tab's own layout in grey: balance and history, the side column.
     return (
-      <div className="flex flex-col gap-4">
-        <div className="h-56 animate-pulse rounded-3xl bg-card" />
-        <div className="h-72 animate-pulse rounded-3xl bg-card" />
+      <div role="status" aria-label="Chargement" className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        <div className="flex min-w-0 flex-col gap-6">
+          <div className="flex flex-col gap-4 rounded-3xl bg-header p-5 sm:p-7">
+            <Bone className="h-4 w-32 bg-header-foreground/10" />
+            <Bone className="h-12 w-56 bg-header-foreground/10" />
+            <Bone className="h-3 w-40 bg-header-foreground/10" />
+          </div>
+          <PeopleRowsSkeleton rows={3} />
+        </div>
+        <div className="flex flex-col gap-3 rounded-3xl bg-card p-5">
+          <Bone className="h-5 w-32" />
+          <Bone className="h-4 w-full" />
+          <Bone className="h-4 w-4/5" />
+          <Bone className="h-10 w-full rounded-full" />
+        </div>
       </div>
     );
   }
@@ -326,7 +340,7 @@ function WithdrawalHistory() {
     <section className="flex flex-col gap-3">
       <h2 className="font-semibold text-lg">Mes retraits</h2>
       {list.isPending ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-card" />
+        <PeopleRowsSkeleton rows={3} />
       ) : list.withdrawals.length === 0 ? (
         <p className="rounded-2xl bg-card px-5 py-6 text-center text-muted-foreground text-sm">
           Aucun retrait demandé.

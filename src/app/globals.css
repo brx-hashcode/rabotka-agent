@@ -309,39 +309,6 @@ a {
   }
 }
 
-/* Brand loader (splash and route loading): a bar sweeping left to right. */
-@keyframes loader-sweep {
-  from {
-    transform: translateX(-100%);
-  }
-  to {
-    transform: translateX(250%);
-  }
-}
-
-.loader-sweep {
-  animation: loader-sweep 1.1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
-
-/* The first-load splash leaves on its own after a while, so it can never stay
-   up if the app's JavaScript fails to start. */
-@keyframes splash-out {
-  to {
-    opacity: 0;
-    visibility: hidden;
-  }
-}
-
-.splash-failsafe {
-  animation: splash-out 300ms ease 8s forwards;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .loader-sweep {
-    animation: none;
-  }
-}
-
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
