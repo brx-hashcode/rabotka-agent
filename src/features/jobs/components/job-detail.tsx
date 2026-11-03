@@ -36,7 +36,10 @@ import {
   seatsLabel,
 } from "#/lib/job-labels";
 import { copyText } from "#/lib/clipboard";
+import type { AgentJob } from "#/lib/api/types";
+import { jobStatus } from "#/features/jobs/job-status";
 import { cn, formatXAF } from "#/lib/utils";
+import { JobSummarySkeleton } from "#/components/page-skeletons";
 
 /** Shares a job link: the phone's share sheet, or a copied link. */
 export async function shareJob(title: string, jobPath: string) {
@@ -77,7 +80,7 @@ export function JobDetail({ id }: Readonly<{ id: string }>) {
       <Button
         size="xl"
         className="w-full rounded-full"
-        render={<Link href={`/auth/sign-in?next=${encodeURIComponent(jobPath)}`} scroll={false} />}
+        render={<Link href={`/auth/sign-in?next=${encodeURIComponent(jobPath)}`} />}
       >
         Se connecter pour voir la rémunération
       </Button>
@@ -86,7 +89,7 @@ export function JobDetail({ id }: Readonly<{ id: string }>) {
     footer = (
       <Button size="xl" className="w-full rounded-full" render={<a href={jobPath} />}>
         <IconUsersGroup />
-        Voir les travailleurs suggérés
+        {detail.data.job.canPlace ? "Voir les travailleurs suggérés" : "Voir mes placements"}
       </Button>
     );
   }
@@ -105,6 +108,8 @@ export function JobHeader({
   const categories = useJobCategories();
   const icon = categories.data?.find((c) => c.slug === job.category?.slug)?.icon;
   const startChip = jobStartShort(job.scheduledAt);
+  // Only history shows a job that stopped recruiting; a free seat means nothing there.
+  const closed = "canPlace" in job && !job.canPlace;
 
   return (
     <header className={cn("flex flex-col gap-4", className)}>
@@ -121,14 +126,23 @@ export function JobHeader({
           </h1>
           <p className="text-muted-foreground text-sm">
             {job.category?.name ?? "Sans catégorie"}
-            <span className="mx-1.5">•</span>
-            <span className={cn(job.seatsLeft <= 0 && "text-destructive")}>
-              {seatsLabel(job.seatsLeft)}
-            </span>
+            {!closed && (
+              <>
+                <span className="mx-1.5">•</span>
+                <span className={cn(job.seatsLeft <= 0 && "text-destructive")}>
+                  {seatsLabel(job.seatsLeft)}
+                </span>
+              </>
+            )}
           </p>
         </div>
       </div>
       <div className="flex flex-wrap gap-1.5">
+        {closed && (
+          <span className={cn("rounded-full px-3 py-1.5 font-medium text-xs", jobStatus((job as AgentJob).status).tone)}>
+            {jobStatus((job as AgentJob).status).label}
+          </span>
+        )}
         <Chip tone="violet">
           {EMPLOYMENT_TYPE_LABELS[job.employmentType] ?? job.employmentType}
         </Chip>
@@ -161,13 +175,17 @@ export function JobSummary({
       label: "Début",
       value: jobStart(job.scheduledAt)?.replace("Début le ", "") ?? "À convenir",
     },
-    {
-      icon: IconUsers,
-      label: "Places",
-      value: agentJob
-        ? freeSeatsLabel(job.seatsLeft, agentJob.quantity)
-        : seatsLabel(job.seatsLeft),
-    },
+    ...(agentJob && !agentJob.canPlace
+      ? []
+      : [
+          {
+            icon: IconUsers,
+            label: "Places",
+            value: agentJob
+              ? freeSeatsLabel(job.seatsLeft, agentJob.quantity)
+              : seatsLabel(job.seatsLeft),
+          },
+        ]),
     { icon: IconHash, label: "Référence", value: job.reference },
     { icon: IconClock, label: "Publiée", value: postedAgo(job.createdAt) },
   ];
@@ -303,7 +321,15 @@ export const ROUND_BUTTON =
 /** Pay for agents; otherwise why the visitor sees only the summary. */
 function PayBlock({ detail }: Readonly<{ detail: JobDetailResult }>) {
   if (detail.kind === "agent") {
-    const { amount, paymentFlow } = detail.job;
+    const { amount, paymentFlow, access } = detail.job;
+    if (access === "limited") {
+      return (
+        <p className="flex items-center gap-2.5 rounded-2xl bg-page px-4 py-3.5 text-muted-foreground text-sm">
+          <IconLock className="size-4 shrink-0" />
+          La rémunération et l&apos;adresse ne sont plus affichées : vos candidats n&apos;ont pas été retenus.
+        </p>
+      );
+    }
     return (
       <div className="rounded-2xl bg-chip-green px-4 py-4">
         <p className="text-chip-green-foreground text-xs">Rémunération</p>
@@ -353,18 +379,7 @@ function Chip({ tone, children }: Readonly<{ tone: keyof typeof TONES; children:
   );
 }
 
+/** The offer's summary while it loads, as JobSummary lays it out. */
 export function JobDetailSkeleton() {
-  return (
-    <div className="flex flex-col gap-6">
-      <div className="flex gap-4">
-        <div className="size-14 animate-pulse rounded-2xl bg-muted" />
-        <div className="flex-1 space-y-2 pt-1">
-          <div className="h-6 w-3/4 animate-pulse rounded bg-muted" />
-          <div className="h-4 w-1/3 animate-pulse rounded bg-muted" />
-        </div>
-      </div>
-      <div className="h-20 animate-pulse rounded-2xl bg-muted" />
-      <div className="h-64 animate-pulse rounded-2xl bg-muted" />
-    </div>
-  );
+  return <JobSummarySkeleton />;
 }

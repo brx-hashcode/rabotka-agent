@@ -157,21 +157,4 @@ function Chip({
   );
 }
 
-export function JobCardSkeleton() {
-  return (
-    <div className="flex h-52 min-w-0 flex-col gap-4 rounded-2xl bg-card p-4 sm:p-6">
-      <div className="flex gap-3">
-        <div className="size-11 animate-pulse rounded-xl bg-muted" />
-        <div className="flex-1 space-y-2 pt-1">
-          <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
-          <div className="h-3 w-1/3 animate-pulse rounded bg-muted" />
-        </div>
-      </div>
-      <div className="flex gap-1.5">
-        <div className="h-5 w-16 animate-pulse rounded-md bg-muted" />
-        <div className="h-5 w-24 animate-pulse rounded-md bg-muted" />
-      </div>
-      <div className="mt-auto h-5 w-full animate-pulse rounded bg-muted" />
-    </div>
-  );
-}
+export { JobCardSkeleton } from "#/components/page-skeletons";

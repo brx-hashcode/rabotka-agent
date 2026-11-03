@@ -25,15 +25,28 @@ import type { JobPlacement, PhoneReveal } from "#/lib/api/types";
 import { cn, getInitials } from "#/lib/utils";
 import { applicationStatus } from "#/features/jobs/application-status";
 import { ActionDialog } from "./action-dialog";
+import { PlacementsSkeleton } from "#/components/page-skeletons";
 
 /**
  * The workers this agent placed on the job — directly, by invitation or by
- * number — and where each application stands. Hidden until there is one.
+ * number — and where each application stands. Hidden until there is one,
+ * unless `showEmpty` keeps its column filled.
  */
-export function Placements({ jobId }: Readonly<{ jobId: string }>) {
+export function Placements({ jobId, showEmpty = false }: Readonly<{ jobId: string; showEmpty?: boolean }>) {
   const placements = usePlacements(jobId, true);
   const list = placements.data ?? [];
-  if (list.length === 0) return null;
+  if (list.length === 0) {
+    if (placements.isPending) return showEmpty ? <PlacementsSkeleton /> : null;
+    if (!showEmpty) return null;
+    return (
+      <section className="flex flex-col gap-3">
+        <h2 className="font-semibold text-lg">Mes placements</h2>
+        <p className="rounded-2xl bg-card px-5 py-8 text-center text-muted-foreground text-sm">
+          Pas encore de placement sur cette offre.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="flex flex-col gap-3">
@@ -52,7 +65,7 @@ export function Placements({ jobId }: Readonly<{ jobId: string }>) {
 
 function PlacementRow({ placement: p }: Readonly<{ placement: JobPlacement }>) {
   const name = `${p.worker.firstName} ${p.worker.lastName}`.trim();
-  const status = applicationStatus(p.status);
+  const status = applicationStatus(p.status, p.rejectionSource);
   const queryClient = useQueryClient();
   const revealKey = ["reveal", p.leadId] as const;
   // Same cache as the candidate card: showing it again must not log another reveal.

@@ -10,7 +10,7 @@ import { cn } from "#/lib/utils";
  * /jobs/[id] reached from the feed: a panel sliding in from the right with
  * the feed still behind it (intercepted `@modal/(.)jobs/[id]`). Closing is
  * `router.back()`, so the URL returns to the filtered feed. Below `md` it
- * fills the screen with a back arrow, like the sign-in dialog.
+ * fills the screen with a back arrow.
  */
 export function JobPanel({ children }: Readonly<{ children: ReactNode }>) {
   const router = useRouter();

@@ -18,6 +18,7 @@ import type { AgentStats } from "#/lib/api/types";
 import { cn, formatXAF } from "#/lib/utils";
 import type { AccountTab } from "./account-page";
 import { PlacementItem } from "./placement-item";
+import { Bone, PeopleRowsSkeleton } from "#/components/page-skeletons";
 
 /** The headline figures, the activity chart, the pipeline and the latest placements. */
 export function OverviewTab({ onOpen }: Readonly<{ onOpen: (tab: AccountTab) => void }>) {
@@ -66,7 +67,14 @@ export function OverviewTab({ onOpen }: Readonly<{ onOpen: (tab: AccountTab) => 
           </>
         ) : (
           Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="h-32 animate-pulse rounded-2xl bg-card" />
+            <div key={i} className="flex flex-col gap-3 rounded-2xl bg-card p-4 sm:p-5">
+              <Bone className="size-9 rounded-xl" />
+              <div className="space-y-2">
+                <Bone className="h-3 w-24" />
+                <Bone className="h-7 w-16" />
+                <Bone className="h-3 w-28" />
+              </div>
+            </div>
           ))
         )}
       </div>
@@ -93,7 +101,7 @@ export function OverviewTab({ onOpen }: Readonly<{ onOpen: (tab: AccountTab) => 
             ))}
           </div>
         </div>
-        {s ? <ActivityChart points={s.timeseries} /> : <div className="h-40 animate-pulse rounded-xl bg-page" />}
+        {s ? <ActivityChart points={s.timeseries} /> : <Bone onPage className="h-40 rounded-xl" />}
       </section>
 
       {s && <Pipeline pipeline={s.pipeline} />}
@@ -113,7 +121,7 @@ export function OverviewTab({ onOpen }: Readonly<{ onOpen: (tab: AccountTab) => 
           )}
         </div>
         {latest.isPending ? (
-          <div className="h-40 animate-pulse rounded-2xl bg-card" />
+          <PeopleRowsSkeleton rows={3} />
         ) : latest.placements.length === 0 ? (
           <p className="rounded-2xl bg-card px-5 py-6 text-center text-muted-foreground text-sm">
             Pas encore de placement. Ouvrez une offre de vos zones pour mobiliser des travailleurs.

@@ -11,13 +11,13 @@ import { cn } from "#/lib/utils";
 import { CandidatesList } from "./candidates";
 import { Placements } from "./placements";
 import {
-  JobDetailSkeleton,
   JobHeader,
   JobLoadError,
   JobSummary,
   ROUND_BUTTON,
   shareJob,
 } from "./job-detail";
+import { JobWorkspaceSkeleton } from "#/components/page-skeletons";
 
 type Tab = "candidats" | "offre";
 
@@ -27,12 +27,15 @@ type Tab = "candidats" | "offre";
  * Agents (job in their zones): desktop shows the job on the left and the
  * suggested workers on the right; phones show a compact header and two tabs,
  * opening on the workers. Visitors, and agents looking at a job outside
- * their zones, get the job alone, centred.
+ * their zones, get the job alone, centred. A job the agent placed someone on
+ * but can no longer work shows those placements beside it, or under it on
+ * phones.
  */
 export function JobWorkspace({ id }: Readonly<{ id: string }>) {
   const detail = useJobDetail(id);
   const isAgentJob = detail.data?.kind === "agent";
-  const candidates = useCandidates(id, isAgentJob);
+  const canPlace = detail.data?.kind === "agent" && detail.data.job.canPlace;
+  const candidates = useCandidates(id, canPlace);
   const [tab, setTab] = useState<Tab>("candidats");
   const jobPath = `/jobs/${id}`;
 
@@ -45,7 +48,7 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
         <IconArrowLeft className="size-4" />
         Toutes les offres
       </Link>
-      {detail.data && (
+      {detail.data && (canPlace || !isAgentJob) && (
         <button
           type="button"
           onClick={() => void shareJob(detail.data.job.title, jobPath)}
@@ -58,12 +61,14 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
     </div>
   );
 
-  if (detail.isPending || detail.isError) {
+  // Loading: the wide two-column frame the offer opens in, not a narrow card.
+  if (detail.isPending) return <JobWorkspaceSkeleton />;
+  if (detail.isError) {
     return (
       <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
         {topBar}
         <div className="rounded-3xl bg-card p-5 sm:p-8">
-          {detail.isPending ? <JobDetailSkeleton /> : <JobLoadError error={detail.error} />}
+          <JobLoadError error={detail.error} />
         </div>
       </div>
     );
@@ -80,11 +85,28 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
             <Button
               size="xl"
               className="w-full rounded-full"
-              render={<Link href={`/auth/sign-in?next=${encodeURIComponent(jobPath)}`} scroll={false} />}
+              render={<Link href={`/auth/sign-in?next=${encodeURIComponent(jobPath)}`} />}
             >
               Se connecter pour voir la rémunération
             </Button>
           )}
+        </div>
+      </div>
+    );
+  }
+
+  // From their history: the job and who they placed, nothing left to do on it.
+  if (!canPlace) {
+    return (
+      <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+        {topBar}
+        <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-8">
+          <div className="rounded-3xl bg-card p-5 sm:p-8">
+            <JobSummary detail={detail.data} />
+          </div>
+          <div className="lg:sticky lg:top-6">
+            <Placements jobId={id} showEmpty />
+          </div>
         </div>
       </div>
     );

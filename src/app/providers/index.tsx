@@ -19,9 +19,10 @@ function makeQueryClient() {
       queries: {
         staleTime: 5 * 60 * 1000,
         // A 401 has already been through one refresh-and-retry (withSession);
-        // retrying it again only delays the redirect to sign-in.
+        // retrying it again only delays the redirect to sign-in. A 404 will
+        // not change either.
         retry: (failureCount, error) =>
-          httpStatusOf(error) !== 401 && failureCount < 3,
+          httpStatusOf(error) !== 401 && httpStatusOf(error) !== 404 && failureCount < 3,
       },
     },
   });
@@ -49,9 +50,8 @@ export function Providers({ children, isAuthenticated }: ProvidersProps) {
   const router = useRouter();
 
   // The session could not be refreshed (cookies already cleared by
-  // /session/refresh): drop cached agent data and open sign-in. A soft
-  // navigation, so it is intercepted into the dialog over the current page,
-  // and `next` brings the agent back to it.
+  // /session/refresh): drop cached agent data and open sign-in. `next`
+  // brings the agent back to the current page.
   useEffect(() => {
     setSessionExpiredHandler(() => {
       queryClient.clear();
