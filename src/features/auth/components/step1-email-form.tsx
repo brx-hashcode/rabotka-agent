@@ -71,8 +71,9 @@ export function Step1EmailForm({
         />
         <Button
           type="submit"
-          size="xl"
-          className="w-full rounded-full"
+          variant="ghost"
+          // The ink pill of rabotka-business' auth pages, as the main action.
+          className="h-12 w-full rounded-full border-0 bg-ink text-[15px] text-white shadow-none hover:bg-ink/90 hover:brightness-100 sm:h-12 sm:text-[15px]"
           disabled={isLoading}
         >
           {isLoading ? (
