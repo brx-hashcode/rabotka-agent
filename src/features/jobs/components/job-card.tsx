@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { IconClock, IconLock, IconMapPin, IconMapPinOff } from "@tabler/icons-react";
+import { IconClock, IconMapPin, IconMapPinOff } from "@tabler/icons-react";
 
 import { useSession } from "#/app/providers/session-context";
 import { useAgentMe } from "#/hooks/use-agent-me";
@@ -76,7 +76,6 @@ export function JobCard({
       )}
 
       <div className="mt-auto pt-4">
-        <div aria-hidden className="mb-4 h-px bg-border/70" />
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5">
           {agentJob ? (
             <p className="min-w-0">
@@ -97,7 +96,7 @@ export function JobCard({
           ) : (
             <PublicJobNote job={job} />
           )}
-          <span className="flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
+          <span className="ml-auto flex shrink-0 items-center gap-1 text-muted-foreground text-xs">
             <IconClock className="size-3.5" />
             {postedAgo(job.createdAt)}
           </span>
@@ -108,29 +107,26 @@ export function JobCard({
 }
 
 /**
- * Where the pay of a public card is. Visitors: agents only. A signed-in agent
- * browsing every job: whether it lies in their zones — opening one that does
- * shows the pay; the others stay summary-only.
+ * Where the pay of a public card is, for a signed-in agent browsing every
+ * job: whether it lies in their zones — opening one that does shows the pay;
+ * the others stay summary-only. Visitors get nothing here: the feed says once,
+ * above the grid, that offers are for agents (VisitorNotice).
  */
 function PublicJobNote({ job }: Readonly<{ job: FeedJob }>) {
   const { isAuthenticated } = useSession();
   const { data: agent } = useAgentMe();
+  if (!isAuthenticated || !agent) return null;
 
-  let icon = IconLock;
-  let label = "Réservé aux agents";
-  if (isAuthenticated && agent) {
-    const city = job.city?.trim().toLowerCase();
-    const inZones =
-      !!city &&
-      agent.zones.some(
-        (z) =>
-          z.city.trim().toLowerCase() === city &&
-          (!job.countryCode || z.countryCode === job.countryCode),
-      );
-    icon = inZones ? IconMapPin : IconMapPinOff;
-    label = inZones ? "Dans vos zones" : "Hors de vos zones";
-  }
-  const Icon = icon;
+  const city = job.city?.trim().toLowerCase();
+  const inZones =
+    !!city &&
+    agent.zones.some(
+      (z) =>
+        z.city.trim().toLowerCase() === city &&
+        (!job.countryCode || z.countryCode === job.countryCode),
+    );
+  const Icon = inZones ? IconMapPin : IconMapPinOff;
+  const label = inZones ? "Dans vos zones" : "Hors de vos zones";
 
   return (
     <p className="flex min-w-0 items-center gap-1.5 text-muted-foreground text-xs">
