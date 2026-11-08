@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { IconFilter, IconMoodEmpty, IconRefresh } from "@tabler/icons-react";
+import Link from "next/link";
+import { IconFilter, IconLock, IconMoodEmpty, IconRefresh } from "@tabler/icons-react";
 
 import { Button } from "#/components/ui/button";
 import {
@@ -21,7 +22,7 @@ import { SortSelect } from "./sort-select";
 
 /** The "/" feed below the hero: title row, filter sidebar, card grid. */
 export function JobsFeed() {
-  const { zoneFeed } = useFeedMode();
+  const { isAuthenticated, zoneFeed } = useFeedMode();
   const [filters] = useFeedFilters();
   const feed = useJobsFeed();
   const categories = useJobCategories();
@@ -111,6 +112,8 @@ export function JobsFeed() {
             inner ? "lg:overflow-y-auto" : "lg:overflow-y-hidden",
           )}
         >
+          {!isAuthenticated && <VisitorNotice />}
+
           {feed.isPending && (
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {Array.from({ length: 4 }, (_, i) => (
@@ -158,6 +161,32 @@ export function JobsFeed() {
           <div ref={sentinel} />
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Said once above the grid rather than on every card: a visitor sees the
+ * offers, an agent works them.
+ */
+function VisitorNotice() {
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-card p-4 sm:px-6">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-lime text-ink">
+        <IconLock className="size-5" />
+      </span>
+      <p className="min-w-0 flex-1 text-sm">
+        <span className="font-medium">Ces offres sont réservées aux agents Rabotka.</span>{" "}
+        <span className="text-muted-foreground">
+          Connectez-vous pour voir les candidats suggérés et placer des travailleurs.
+        </span>
+      </p>
+      <Link
+        href="/auth/sign-in"
+        className="inline-flex h-10 shrink-0 items-center rounded-full bg-ink px-5 font-medium text-sm text-white transition-colors hover:bg-ink/90"
+      >
+        Se connecter
+      </Link>
     </div>
   );
 }

@@ -185,7 +185,12 @@ function CategoryPicker({
   const [showAll, setShowAll] = useState(false);
 
   const q = fold(query.trim());
-  const matches = q ? categories.filter((c) => fold(c.name).includes(q)) : categories;
+  // Only categories with offers right now (and any already ticked); until the
+  // counts arrive, all of them.
+  const offered = counts
+    ? categories.filter((c) => (counts[c.slug] ?? 0) > 0 || selected.includes(c.slug))
+    : categories;
+  const matches = q ? offered.filter((c) => fold(c.name).includes(q)) : offered;
   const visible = q || showAll ? matches : matches.slice(0, TOP_CATEGORIES);
   const chosen = categories.filter((c) => selected.includes(c.slug));
 
@@ -263,7 +268,7 @@ function CategoryPicker({
           onClick={() => setShowAll((v) => !v)}
           className="self-start font-medium text-sm text-whatsapp-dark hover:underline"
         >
-          {showAll ? "Voir moins" : `Voir toutes les catégories (${matches.length})`}
+          {showAll ? "Voir moins" : "Voir toutes les catégories"}
         </button>
       )}
     </div>

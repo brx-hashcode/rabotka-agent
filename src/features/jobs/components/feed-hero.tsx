@@ -79,7 +79,7 @@ export function FeedHero() {
           <p className="text-header-muted text-sm sm:text-base">
             {isAuthenticated
               ? "Repérez une offre, mobilisez les bons travailleurs, suivez vos placements."
-              : "Les agents Rabotka connectent les travailleurs de leur ville aux offres qui les attendent."}
+              : "Vous connectez les travailleurs de votre ville aux offres qui les attendent."}
           </p>
         </div>
 
@@ -128,7 +128,9 @@ export function FeedHero() {
           <Button
             type="submit"
             size="xl"
-            className="rounded-full px-8 md:ml-2"
+            variant="ghost"
+            // The ink pill of « Se connecter » and the sign-in page.
+            className="rounded-full bg-ink px-8 text-white hover:bg-ink/90 hover:text-white md:ml-2"
           >
             Rechercher
           </Button>

@@ -63,6 +63,9 @@
   --header-muted: #3f5f3a;
   /* Dark ink for fills that need white on top (ticked checkboxes, active tabs). */
   --ink: #0f2414;
+  /* The brand lime as a fill (brand marks, accents), the same in both
+     themes — unlike --header, which darkens with the dark theme. */
+  --brand-lime: #cbffa5;
   /* Soft job-card chips. */
   --chip-violet: #f1ecfd;
   --chip-violet-foreground: #6b46c1;
@@ -335,6 +338,7 @@ a {
   --color-header-foreground: var(--header-foreground);
   --color-header-muted: var(--header-muted);
   --color-ink: var(--ink);
+  --color-brand-lime: var(--brand-lime);
   --color-chip-violet: var(--chip-violet);
   --color-chip-violet-foreground: var(--chip-violet-foreground);
   --color-chip-green: var(--chip-green);
