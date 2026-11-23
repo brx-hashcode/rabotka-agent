@@ -19,7 +19,16 @@ import type {
 
 const PAGE_SIZE = 20;
 
-export const EMPLOYMENT_TYPES = ["MISSION", "CDD", "CDI", "STAGE"] as const;
+export const EMPLOYMENT_TYPES = [
+  "MISSION",
+  "CDD",
+  "CDI",
+  "STAGE",
+  "CONSULTANT",
+  "INTERIM",
+  "APPRENTISSAGE",
+  "VOLONTARIAT",
+] as const;
 const SORTS = ["recent", "start"] as const;
 const SCOPES = ["zones", "all"] as const;
 
