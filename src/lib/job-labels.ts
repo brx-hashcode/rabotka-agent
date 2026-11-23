@@ -9,6 +9,10 @@ export const EMPLOYMENT_TYPE_LABELS: Record<EmploymentType, string> = {
   CDD: "CDD",
   CDI: "CDI",
   STAGE: "Stage",
+  CONSULTANT: "Consultant",
+  INTERIM: "Intérim",
+  APPRENTISSAGE: "Apprentissage",
+  VOLONTARIAT: "Volontariat",
 };
 
 // Read after an amount: « 15 000 FCFA la tâche ».
