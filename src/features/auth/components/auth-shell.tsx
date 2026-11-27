@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { BrandLogo } from "#/components/brand-logo";
 import { cn } from "#/lib/utils";
+import { ThemeButton } from "#/components/theme-toggle";
 
 const PUBLIC_SITE = "https://www.rabotka.work";
 
@@ -18,9 +19,12 @@ export function AuthShell({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <div className="grid min-h-svh bg-card lg:grid-cols-2">
       <section className="flex min-h-svh min-w-0 flex-col px-5 py-6 sm:px-10">
-        <Link href="/" aria-label="Rabotka — accueil" className="self-start">
-          <BrandLogo />
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/" aria-label="Rabotka — accueil">
+            <BrandLogo />
+          </Link>
+          <ThemeButton tone="card" className="size-9" />
+        </div>
 
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col">{children}</div>
 
@@ -45,12 +49,12 @@ export function AuthShell({ children }: Readonly<{ children: ReactNode }>) {
   );
 }
 
-/** A few words underlined in lime, as with a highlighter; lime text on the ink card. */
+/** A few words underlined in lime, as with a highlighter; lime text on the ink card and in the dark theme, where the line would hide white letters. */
 function Mark({ children, onDark = false }: Readonly<{ children: ReactNode; onDark?: boolean }>) {
   return onDark ? (
     <span className="text-brand-lime">{children}</span>
   ) : (
-    <span className="box-decoration-clone bg-[linear-gradient(transparent_58%,var(--brand-lime)_58%)]">
+    <span className="box-decoration-clone bg-[linear-gradient(transparent_58%,var(--brand-lime)_58%)] dark:bg-none dark:text-brand-lime">
       {children}
     </span>
   );
@@ -111,7 +115,7 @@ function FeatureWall() {
         </div>
 
         <div className="flex min-h-0 flex-col gap-3">
-          <div className={cn(card, "flex-[2.5] bg-brand-lime text-ink")}>
+          <div className={cn(card, "flex-[2.5] bg-brand-lime text-brand-lime-foreground")}>
             <p className="font-bold font-display text-7xl leading-none">6</p>
             <p className="mt-4 max-w-56 text-sm">
               Un code à 6 chiffres reçu par e-mail à chaque connexion : aucun mot de passe à retenir.

@@ -55,17 +55,24 @@
   --hero-a: rgba(79, 184, 178, 0.36);
   --hero-b: rgba(47, 106, 74, 0.2);
   --radius: 0.625rem;
-  /* Agent app shell: light grey page under a near-black header band. */
+  /* Agent app shell: light grey page (dark in the dark theme) under the lime header band. */
   --page: #f1f4f8;
-  /* Brand lime band (header, hero, sign-in panel) with dark text on it. */
+  /* Brand lime band (header, hero, sign-in panel) with dark text on it, in
+     both themes. */
   --header: #cbffa5;
   --header-foreground: #0f2414;
   --header-muted: #3f5f3a;
   /* Dark ink for fills that need white on top (ticked checkboxes, active tabs). */
   --ink: #0f2414;
-  /* The brand lime as a fill (brand marks, accents), the same in both
-     themes — unlike --header, which darkens with the dark theme. */
+  /* The brand lime as a fill (brand marks, accents). Like --header, it
+     stays lime in the dark theme. */
   --brand-lime: #cbffa5;
+  /* Text on lime, in both themes: the lime stays lime in the dark theme. */
+  --brand-lime-foreground: #0f2414;
+  /* A button on the lime header or hero: dark ink in both themes. */
+  --cta: #0f2414;
+  --cta-foreground: #ffffff;
+  --shadow-soft-value: 0 4px 20px -4px hsl(25 35% 15% / 0.08);
   /* Soft job-card chips. */
   --chip-violet: #f1ecfd;
   --chip-violet-foreground: #6b46c1;
@@ -108,7 +115,11 @@
   --destructive-foreground: var(--color-red-700);
 }
 
-:root[data-theme="dark"] {
+/* The starter's brand inks, light in the dark theme: `body` takes its text
+   colour from --sea-ink, so every heading without a colour of its own
+   follows it. next-themes sets the `dark` class, as in rabotka-business. */
+:root[data-theme="dark"],
+:root.dark {
   --sea-ink: #d7ece8;
   --sea-ink-soft: #afcdc8;
   --lagoon: #60d7cf;
@@ -330,7 +341,7 @@ a {
    * token behind it, so Tailwind emitted nothing and those surfaces have been
    * rendering flat.
    */
-  --shadow-soft: 0 4px 20px -4px hsl(25 35% 15% / 0.08);
+  --shadow-soft: var(--shadow-soft-value);
   --color-whatsapp: hsl(var(--whatsapp));
   --color-whatsapp-dark: hsl(var(--whatsapp-dark));
   --color-page: var(--page);
@@ -339,6 +350,9 @@ a {
   --color-header-muted: var(--header-muted);
   --color-ink: var(--ink);
   --color-brand-lime: var(--brand-lime);
+  --color-brand-lime-foreground: var(--brand-lime-foreground);
+  --color-cta: var(--cta);
+  --color-cta-foreground: var(--cta-foreground);
   --color-chip-violet: var(--chip-violet);
   --color-chip-violet-foreground: var(--chip-violet-foreground);
   --color-chip-green: var(--chip-green);
@@ -380,8 +394,19 @@ a {
 }
 
 .dark {
-  --page: #0b1114;
-  --header: #05080a;
+  /*
+   * As rabotka-business: neutral blacks and greys, no blue cast. The lime
+   * header and hero stay lime (--header is not redefined), like the site's.
+   */
+  /*
+   * A soft brown shadow is invisible on black: a menu over the page read as
+   * part of it. A darker drop, and a faint light edge drawn by the shadow
+   * itself (no border), so floating layers stand off the page.
+   */
+  --shadow-soft-value: 0 0 0 1px rgb(255 255 255 / 0.07), 0 10px 30px -8px rgb(0 0 0 / 0.7);
+  --page: oklch(0.145 0 0);
+  /* Buttons and chosen tabs filled with ink stay readable on the dark page. */
+  --ink: #2c7a45;
   --chip-violet: rgb(139 92 246 / 0.16);
   --chip-violet-foreground: #c4b5fd;
   --chip-green: rgb(34 197 94 / 0.14);
@@ -421,6 +446,15 @@ a {
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
   --destructive-foreground: var(--color-red-400);
+}
+
+/* The main titles, in the logo's face, as rabotka-business's. */
+@utility hero-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.06;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 
 /* Hide scrollbars but keep scroll behavior */
