@@ -65,13 +65,14 @@ export function Providers({ children, isAuthenticated }: ProvidersProps) {
     <QueryClientProvider client={queryClient}>
       <SessionProvider isAuthenticated={isAuthenticated}>
         {/*
-          Light only, by design: the black header band is the contrast, and the
-          feed below stays light grey with white cards whatever the system
-          theme. The dark tokens remain in globals.css for a later toggle.
+          The device's theme until one is chosen (the sun/moon in the header
+          and on sign-in), as rabotka-business. The lime header and hero stay
+          lime in both; the page and its cards go dark.
         */}
         <ThemeProvider
           attribute="class"
-          forcedTheme="light"
+          defaultTheme="system"
+          enableSystem
           storageKey="theme"
           disableTransitionOnChange
         >

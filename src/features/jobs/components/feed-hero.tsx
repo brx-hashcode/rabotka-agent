@@ -73,7 +73,7 @@ export function FeedHero() {
         />
 
         <div className="relative max-w-xl space-y-3">
-          <h1 className="font-semibold text-[28px] leading-tight tracking-tight sm:text-4xl">
+          <h1 className="hero-title text-[2rem] sm:text-5xl">
             {heroTitle(isAuthenticated, zoneFeed)}
           </h1>
           <p className="text-header-muted text-sm sm:text-base">

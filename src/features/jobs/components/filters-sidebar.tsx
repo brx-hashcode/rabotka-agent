@@ -215,7 +215,7 @@ function CategoryPicker({
 
       {/* Grey in the phone sheet (white), white in the desktop sidebar, which
           sits on the grey page — a grey box there had no edge at all. */}
-      <label className="flex h-11 items-center gap-2 rounded-2xl bg-page px-3 ring-1 ring-black/5 ring-inset focus-within:ring-2 focus-within:ring-whatsapp/40 lg:bg-card">
+      <label className="flex h-11 items-center gap-2 rounded-2xl bg-page px-3 ring-1 ring-foreground/5 ring-inset focus-within:ring-2 focus-within:ring-whatsapp/40 lg:bg-card">
         <IconSearch className="size-4 shrink-0 text-muted-foreground" />
         <input
           value={query}
