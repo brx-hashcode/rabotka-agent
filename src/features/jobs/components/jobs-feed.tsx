@@ -57,7 +57,7 @@ export function JobsFeed() {
   const sidebar = <FiltersSidebar facets={feed.facets} showPay={zoneFeed} />;
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:flex lg:h-svh lg:flex-col lg:pb-0">
+    <div className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 lg:flex lg:h-[calc(100svh-4rem)] lg:flex-col lg:pb-0">
       <div className="mb-6 flex shrink-0 flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-3">
           <h2 className="font-semibold text-2xl tracking-tight">
@@ -172,7 +172,7 @@ export function JobsFeed() {
 function VisitorNotice() {
   return (
     <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-card p-4 sm:px-6">
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-lime text-ink">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-lime text-brand-lime-foreground">
         <IconLock className="size-5" />
       </span>
       <p className="min-w-0 flex-1 text-sm">

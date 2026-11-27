@@ -104,7 +104,7 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
           <div className="rounded-3xl bg-card p-5 sm:p-8">
             <JobSummary detail={detail.data} />
           </div>
-          <div className="lg:sticky lg:top-6">
+          <div className="lg:sticky lg:top-22">
             <Placements jobId={id} showEmpty />
           </div>
         </div>
@@ -148,7 +148,7 @@ export function JobWorkspace({ id }: Readonly<{ id: string }>) {
       </div>
 
       <div className="lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-8">
-        <div className={cn("lg:sticky lg:top-6", tab !== "offre" && "max-lg:hidden")}>
+        <div className={cn("lg:sticky lg:top-22", tab !== "offre" && "max-lg:hidden")}>
           <div className="rounded-3xl bg-card p-5 sm:p-6">
             {/* The compact header already shows title and chips on phones. */}
             <JobSummary detail={detail.data} headerClassName="max-lg:hidden" />

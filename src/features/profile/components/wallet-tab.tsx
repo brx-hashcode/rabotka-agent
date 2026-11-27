@@ -146,7 +146,7 @@ function BalanceCard({
         ].map(({ label, value, icon: Icon }) => (
           <div
             key={label}
-            className="flex min-w-0 items-center justify-between gap-2 rounded-2xl bg-white/45 px-3 py-2.5 sm:block sm:p-3 dark:bg-black/20"
+            className="flex min-w-0 items-center justify-between gap-2 rounded-2xl bg-white/45 px-3 py-2.5 sm:block sm:p-3"
           >
             <dt className="flex items-center gap-1.5 text-header-muted text-xs">
               <Icon className="size-3.5 shrink-0" />
@@ -166,9 +166,9 @@ function PendingRequest({ withdrawal: w }: Readonly<{ withdrawal: AgentWithdrawa
   const cancel = useCancelWithdrawal();
 
   return (
-    <div className="flex w-full flex-col gap-2 rounded-2xl bg-white/60 p-4 sm:w-80 dark:bg-black/20">
+    <div className="flex w-full flex-col gap-2 rounded-2xl bg-white/60 p-4 sm:w-80">
       <div className="flex items-center">
-        <span className="inline-flex items-center gap-1.5 rounded-full bg-chip-amber px-2.5 py-1 font-medium text-chip-amber-foreground text-xs">
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-header-foreground/10 px-2.5 py-1 font-medium text-header-foreground text-xs">
           <IconClockHour4 className="size-3.5" />
           Retrait en attente
         </span>
